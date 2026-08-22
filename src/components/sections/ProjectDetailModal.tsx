@@ -53,18 +53,18 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="absolute inset-0 bg-black/50 backdrop-blur-xs z-40 lg:hidden"
+          className="absolute inset-0 bg-black/50 z-40 lg:hidden"
         />
 
         {/* Panel Samping (Side Drawer untuk Desktop, Modal Terpusat untuk Mobile) */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 10 }}
+          initial={{ opacity: 0, scale: 0.98, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 10 }}
-          transition={{ type: 'spring', damping: 28, stiffness: 260 }}
+          exit={{ opacity: 0, scale: 0.98, y: 10 }}
+          transition={{ duration: 0.2, ease: 'easeOut' }} // Ganti spring yang berat dengan easeOut ringan
           onClick={(e) => e.stopPropagation()}
           className={`
-            fixed inset-4 m-auto z-50 w-auto max-w-lg max-h-[85vh] rounded-3xl overflow-hidden shadow-2xl flex flex-col border backdrop-blur-xl
+            fixed inset-4 m-auto z-50 w-auto max-w-lg max-h-[85vh] rounded-3xl overflow-hidden shadow-2xl flex flex-col border lg:backdrop-blur-xl transform-gpu will-change-transform
             lg:absolute lg:inset-auto lg:top-0 lg:left-[calc(100%+16px)] lg:w-[440px] lg:m-0 lg:max-h-[85vh]
             ${
               isLight

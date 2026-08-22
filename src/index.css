@@ -144,3 +144,21 @@
 .animate-orbitRed {
   animation: orbitRed 30s linear infinite;
 }
+
+/* --- OPTIMASI KHUSUS PERANGKAT MOBILE (Mencegah Lagging Animasi & Ganti Tema) --- */
+@media (max-width: 768px) {
+  /* Nonaktifkan efek blur yang berat di mobile, ganti dengan warna solid semi-transparan */
+  .backdrop-blur-xl,
+  .backdrop-blur-sm,
+  .backdrop-blur-xs {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  /* Ringankan transisi warna saat ganti tema di mobile agar tidak memicu reflow berat */
+  *, ::before, ::after {
+    transition-property: color, background-color, border-color !important;
+    transition-duration: 150ms !important;
+    transition-timing-function: ease !important;
+  }
+}

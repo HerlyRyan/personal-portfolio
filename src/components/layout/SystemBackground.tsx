@@ -11,9 +11,9 @@ export const SystemBackground: React.FC<SystemBackgroundProps> = ({ children }) 
   const isLight = theme === 'light';
 
   return (
-    <div className={`min-h-screen md:h-screen w-full relative flex flex-col justify-between md:overflow-hidden transition-colors duration-500 ${
-      isLight ? 'bg-slate-100 text-slate-800' : 'bg-[#07090e] text-slate-100'
-    }`}>
+    <div className={`h-screen md:h-screen w-full relative flex flex-col justify-between md:overflow-hidden transition-colors duration-200 ${
+        isLight ? 'bg-slate-100 text-slate-800' : 'bg-[#07090e] text-slate-100'
+        }`}>
       
       <ClickRippleEffect>
         {/* 1. CSS Grid Pattern */}
