@@ -1,111 +1,146 @@
-:root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+@import "tailwindcss";
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+@theme {
+  --color-dark-bg: #050505;
+  --color-dark-card: #0a0d14;
+  --color-dark-border: #1e2530;
+  
+  --color-navy-base: #0b0f19;
+  --color-navy-deep: #070a10;
+  
+  --color-accent-blue: #3b82f6;
+  --color-accent-subtle: #1d4ed8;
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
 
-  @media (max-width: 1024px) {
-    font-size: 16px;
+/* Base layer styling untuk dark theme konsisten */
+@layer base {
+  body {
+    background-color: var(--color-dark-bg);
+    color: #f8fafc;
+    font-family: var(--font-sans);
+    overflow-x: hidden;
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+/* Aturan kustom untuk Light Mode */
+.light-theme {
+  background-color: #f1f5f9 !important; /* Latar belakang luar */
+  color: #0f172a !important;
+}
+
+.light-theme .bg-dark {
+  background-color: #f1f5f9 !important;
+}
+
+/* Kartu Utama */
+.light-theme .bg-dark-card {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+}
+
+/* Sidebar Profil di sebelah kiri (yang tadinya gelap) */
+.light-theme .bg-navy-base {
+  background-color: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+
+.light-theme .border-dark-border {
+  border-color: #e2e8f0 !important;
+}
+
+/* Teks dan warna judul */
+.light-theme .text-white {
+  color: #0f172a !important;
+}
+
+.light-theme .text-slate-100,
+.light-theme .text-slate-300,
+.light-theme .text-slate-400 {
+  color: #475569 !important;
+}
+
+.light-theme .text-slate-500 {
+  color: #64748b !important;
+}
+
+/* Tombol Modul di Bagian Bawah & Elemen Border */
+.light-theme .bg-dark-border\/40,
+.light-theme .bg-dark-border\/50 {
+  background-color: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+}
+
+.light-theme .hover\:bg-dark-border:hover {
+  background-color: #e2e8f0 !important;
+}
+
+/* 1. Mengatur lebar dan border-radius container scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+/* 2. Membuat track (jalur) scrollbar transparan agar mengikuti warna background modal */
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent; 
+  border-radius: 9999px;
+}
+
+/* 3. Styling Batang (Thumb) Scrollbar untuk Dark Mode */
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(75, 85, 99, 0.4); /* Warna abu-abu transparan elegan */
+  border-radius: 9999px;
+  border: 2px solid transparent; /* Memberikan efek padding di dalam track */
+  background-clip: content-box;
+}
+
+/* 4. Styling Batang (Thumb) Scrollbar untuk Light Mode (jika parent memiliki class tertentu atau diatur via state) */
+.light .custom-scrollbar::-webkit-scrollbar-thumb,
+.is-light .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(203, 213, 225, 0.8); /* Warna abu-abu terang untuk light mode */
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+/* Efek saat di-hover */
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 130, 246, 0.8); /* Berubah jadi accent-blue saat di-hover */
+  background-clip: content-box;
+}
+
+@keyframes spideyGlow {
+  0%, 100% { transform: translate(0px, 0px) scale(1); opacity: 0.8; }
+  50% { transform: translate(-25px, 20px) scale(1.15); opacity: 1; }
+}
+
+.animate-spideyGlow {
+  animation: spideyGlow 14s infinite ease-in-out;
+}
+
+@keyframes orbitBlue {
+  0% {
+    transform: rotate(0deg) translate(220px) rotate(0deg);
   }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
+  100% {
+    transform: rotate(360deg) translate(220px) rotate(-360deg);
   }
 }
 
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-}
-
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
-}
-
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
+@keyframes orbitRed {
+  0% {
+    transform: rotate(360deg) translate(-180px) rotate(-360deg);
+  }
+  100% {
+    transform: rotate(0deg) translate(-180px) rotate(0deg);
   }
 }
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
-  margin: 0;
+
+.animate-orbitBlue {
+  animation: orbitBlue 25s linear infinite;
 }
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
-}
-
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+.animate-orbitRed {
+  animation: orbitRed 30s linear infinite;
 }
