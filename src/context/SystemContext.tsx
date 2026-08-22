@@ -64,9 +64,12 @@ export const SystemProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const toggleTheme = () => {
     setTheme((prev) => {
       const nextTheme = prev === 'dark' ? 'light' : 'dark';
-      showToast(`Theme switched to ${nextTheme.toUpperCase()}`);
+      // Gunakan setTimeout kecil agar tidak terjadi race-condition rendering di mobile
+      setTimeout(() => {
+        showToast(`Theme switched to ${nextTheme.toUpperCase()}`);
+      }, 50);
       return nextTheme;
-    })
+    });
   };
 
   // Fungsi global untuk membuka modal dengan efek loading path

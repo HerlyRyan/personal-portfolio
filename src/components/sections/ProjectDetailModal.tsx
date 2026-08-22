@@ -61,15 +61,12 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
           initial={{ opacity: 0, scale: 0.98, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.98, y: 10 }}
-          transition={{ duration: 0.2, ease: 'easeOut' }} // Ganti spring yang berat dengan easeOut ringan
+          // Nonaktifkan durasi pegas berat di mobile, buat instan atau sangat cepat
+          transition={{ duration: 0.15, ease: 'easeOut' }}
           onClick={(e) => e.stopPropagation()}
           className={`
             fixed inset-4 m-auto z-50 w-auto max-w-lg max-h-[85vh] rounded-3xl overflow-hidden shadow-2xl flex flex-col border lg:backdrop-blur-xl transform-gpu will-change-transform
             lg:absolute lg:inset-auto lg:top-0 lg:left-[calc(100%+16px)] lg:w-[440px] lg:m-0 lg:max-h-[85vh]
-            ${
-              isLight
-                ? 'bg-white/95 border-slate-200/80 shadow-slate-300/50'
-                : 'bg-dark-card/95 border-dark-border/80 shadow-black/60'
             }
           `}
         >
