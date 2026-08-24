@@ -14,7 +14,6 @@
   --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
 }
 
-/* Base layer styling menggunakan CSS Variables agar perpindahan tema instan & bebas stutter */
 :root {
   --bg-main: #050505;
   --bg-card: #0a0d14;
@@ -22,6 +21,7 @@
   --bg-sidebar: #0b0f19;
   --bg-deep: #070a10;
   --text-main: #f8fafc;
+  --text-muted: #94a3b8;
 }
 
 html.light-theme {
@@ -31,7 +31,8 @@ html.light-theme {
   --border-color: #cbd5e1;
   --bg-sidebar: #f8fafc;
   --bg-deep: #e2e8f0;
-  --text-main: #0f172a;
+  --text-main: #0f172a;      /* Warna teks utama jauh lebih pekat & tajam di light mode */
+  --text-muted: #334155;     /* Warna teks sekunder/tombol jadi lebih gelap agar sangat kontras & jelas */
 }
 
 @layer base {
@@ -40,14 +41,27 @@ html.light-theme {
     color: var(--text-main);
     font-family: var(--font-sans);
     overflow-x: hidden;
+    /* Mencegah layout thrashing massal dengan memisahkan layer root */
+    will-change: background-color, color;
   }
 }
 
-/* 
-  Catatan: Seluruh aturan .light-theme manual yang panjang di bawah 
-  sudah dihapus total karena warnanya kini otomatis di-handle 
-  oleh CSS Variables di atas secara instan tanpa membebani CPU!
-*/
+/* Memaksa elemen utama kartu & sidebar menggunakan komposisi GPU mandiri agar ganti tema instan tanpa stutter */
+.bg-dark-card, .bg-navy-base, body {
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+/* Styling teks utilitas agar otomatis mengikuti variabel kontras baru */
+.light-theme .text-slate-400,
+.light-theme .text-slate-300,
+.light-theme .text-slate-100 {
+  color: var(--text-muted) !important;
+}
+
+.light-theme .text-white {
+  color: var(--text-main) !important;
+}
 
 /* 1. Mengatur lebar dan border-radius container scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
@@ -55,13 +69,11 @@ html.light-theme {
   height: 8px;
 }
 
-/* 2. Membuat track (jalur) scrollbar transparan agar mengikuti warna background modal */
 .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent; 
   border-radius: 9999px;
 }
 
-/* 3. Styling Batang (Thumb) Scrollbar untuk Dark Mode */
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background: rgba(75, 85, 99, 0.4);
   border-radius: 9999px;
@@ -84,21 +96,13 @@ html.light-theme {
 }
 
 @keyframes orbitBlue {
-  0% {
-    transform: rotate(0deg) translate(220px) rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg) translate(220px) rotate(-360deg);
-  }
+  0% { transform: rotate(0deg) translate(220px) rotate(0deg); }
+  100% { transform: rotate(360deg) translate(220px) rotate(-360deg); }
 }
 
 @keyframes orbitRed {
-  0% {
-    transform: rotate(360deg) translate(-180px) rotate(-360deg);
-  }
-  100% {
-    transform: rotate(0deg) translate(-180px) rotate(0deg);
-  }
+  0% { transform: rotate(360deg) translate(-180px) rotate(-360deg); }
+  100% { transform: rotate(0deg) translate(-180px) rotate(0deg); }
 }
 
 .animate-orbitBlue {
@@ -109,7 +113,6 @@ html.light-theme {
   animation: orbitRed 30s linear infinite;
 }
 
-/* --- OPTIMASI KHUSUS PERANGKAT MOBILE & LAPTOP LAMA --- */
 @media (max-width: 768px) {
   .backdrop-blur-xl,
   .backdrop-blur-sm,
