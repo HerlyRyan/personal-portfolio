@@ -162,3 +162,10 @@
     transition-timing-function: ease !important;
   }
 }
+
+/* Jangan render ulang atau hitung layout elemen yang tertutup modal atau di luar viewport */
+.modal-content-container, 
+.system-card-bg {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 500px; /* Estimasi ukuran default */
+}

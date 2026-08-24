@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { startTransition, useState } from 'react';
 import { PROJECTS_DATA } from '../../data/projectsData';
 import type { Project } from '../../data/projectsData';
 import { useModalEffect } from '../../hooks/useModalEfffect.ts';
@@ -80,11 +80,13 @@ export const ProjectsModal: React.FC<ProjectsModalProps> = ({
                 <div
                   key={project.id}
                   onClick={() => {
-                    if (isSelected) {
-                      setSelectedProject(null);
-                    } else {
-                      setSelectedProject(project);
-                    }
+                    startTransition(() => {
+                      if (isSelected) {
+                        setSelectedProject(null);
+                      } else {
+                        setSelectedProject(project);
+                      }
+                    });
                   }}
                   className={`border rounded-2xl p-6 transition-all space-y-4 cursor-pointer group ${
                     isSelected

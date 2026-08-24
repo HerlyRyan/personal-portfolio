@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, startTransition } from 'react';
 import { id } from '../locales/id';
 import { en } from '../locales/en';
 
@@ -62,23 +62,27 @@ export const SystemProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const toggleLang = () => setLang((prev) => (prev === 'EN' ? 'ID' : 'EN'));
   const toggleTheme = () => {
-    setTheme((prev) => {
-      const nextTheme = prev === 'dark' ? 'light' : 'dark';
-      // Gunakan setTimeout kecil agar tidak terjadi race-condition rendering di mobile
-      setTimeout(() => {
-        showToast(`Theme switched to ${nextTheme.toUpperCase()}`);
-      }, 50);
-      return nextTheme;
+    startTransition(() => {
+      setTheme((prev) => {
+        const nextTheme = prev === 'dark' ? 'light' : 'dark';
+        return nextTheme;
+      });
     });
+    // Jalankan toast di luar transisi agar tidak membebani state utama
+    setTimeout(() => {
+      showToast(`Theme switched`);
+    }, 100);
   };
 
   // Fungsi global untuk membuka modal dengan efek loading path
   const openModal = (id: ModalType, path: string) => {
-    setLoadingPath(path);
-    setTimeout(() => {
-      setLoadingPath(null);
-      setActiveModal(id);
-    }, 800);
+    requestAnimationFrame(() => {
+      setLoadingPath(path);
+      setTimeout(() => {
+        setLoadingPath(null);
+        setActiveModal(id);
+      }, 800);
+    });
   };
 
   // Fungsi global untuk menutup modal dengan efek loading path (bisa dipakai semua modal!)
