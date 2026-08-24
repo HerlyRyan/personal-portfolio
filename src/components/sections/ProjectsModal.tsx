@@ -51,23 +51,9 @@ export const ProjectsModal: React.FC<ProjectsModalProps> = ({ isOpen }) => {
   ];
   const hasMedia = mediaList.length > 0;
 
-  const handleNextMedia = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (hasMedia) {
-      setMediaIndex((prev) => (prev + 1) % mediaList.length);
-    }
-  };
-
-  const handlePrevMedia = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (hasMedia) {
-      setMediaIndex((prev) => (prev - 1 + mediaList.length) % mediaList.length);
-    }
-  };
-
   return (
     <ModalContainer>
-      {/* Modal Header: Super Minimalis tanpa teks [1 of 2] */}
+      {/* Modal Header */}
       <ModalHeader title="Projects" onClose={() => closeModal("~/sys/home")} />
 
       {/* Modal Body */}
@@ -130,62 +116,119 @@ export const ProjectsModal: React.FC<ProjectsModalProps> = ({ isOpen }) => {
               </div>
             )}
 
-            {/* Cover & Screenshots Unified Carousel dengan Minimalist Bottom Bar */}
+            {/* Cover & Screenshots Scrollable Carousel */}
             <div className="space-y-2.5">
               <div
-                className={`w-full h-56 rounded-2xl overflow-hidden border relative flex items-center justify-center group ${
+                className={`w-full h-56 rounded-2xl overflow-hidden border relative group ${
                   isLight
                     ? "bg-slate-100 border-slate-200 shadow-inner"
                     : "bg-dark-border/20 border-dark-border shadow-inner"
                 }`}
               >
                 {hasMedia ? (
-                  <>
-                    <motion.img
-                      key={mediaIndex}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.15 }}
-                      src={mediaList[mediaIndex]}
-                      alt={`${currentProject.title} media ${mediaIndex + 1}`}
-                      className="w-full h-full object-cover"
-                    />
+                  <div
+                    id="media-carousel-container"
+                    onScroll={(e) => {
+                      const target = e.currentTarget;
+                      const scrollLeft = target.scrollLeft;
+                      const itemWidth = target.clientWidth;
+                      const newIndex = Math.round(scrollLeft / itemWidth);
+                      if (
+                        newIndex !== mediaIndex &&
+                        newIndex >= 0 &&
+                        newIndex < mediaList.length
+                      ) {
+                        setMediaIndex(newIndex);
+                      }
+                    }}
+                    className="w-full h-full flex overflow-x-auto snap-x snap-mandatory scroll-smooth"
+                    style={{
+                      scrollbarWidth: "none",
+                      msOverflowStyle: "none",
+                    }}
+                  >
+                    <style>{`
+                      #media-carousel-container::-webkit-scrollbar {
+                        display: none;
+                      }
+                    `}</style>
 
-                    {mediaList.length > 1 && (
-                      <>
-                        <button
-                          onClick={handlePrevMedia}
-                          className={`absolute left-3 w-8 h-8 rounded-full backdrop-blur-md flex items-center justify-center transition-all text-xs font-mono cursor-pointer shadow-md ${
-                            isLight
-                              ? "bg-white/90 text-slate-800 border border-slate-200 hover:bg-accent-blue hover:text-white"
-                              : "bg-black/60 text-white border border-white/10 hover:bg-accent-blue"
-                          }`}
-                        >
-                          ❮
-                        </button>
-                        <button
-                          onClick={handleNextMedia}
-                          className={`absolute right-3 w-8 h-8 rounded-full backdrop-blur-md flex items-center justify-center transition-all text-xs font-mono cursor-pointer shadow-md ${
-                            isLight
-                              ? "bg-white/90 text-slate-800 border border-slate-200 hover:bg-accent-blue hover:text-white"
-                              : "bg-black/60 text-white border border-white/10 hover:bg-accent-blue"
-                          }`}
-                        >
-                          ❯
-                        </button>
-                      </>
-                    )}
-                  </>
+                    {mediaList.map((mediaUrl, idx) => (
+                      <div
+                        key={idx}
+                        className="w-full h-full flex-shrink-0 snap-center relative"
+                      >
+                        <img
+                          src={mediaUrl}
+                          alt={`${currentProject.title} media ${idx + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ))}
+                  </div>
                 ) : (
-                  <div className="text-center space-y-1 p-4">
+                  <div className="w-full h-full flex items-center justify-center text-center space-y-1 p-4">
                     <span className="text-[11px] font-mono text-accent-blue">
                       [Cover & Screenshots Pending]
                     </span>
                   </div>
                 )}
+
+                {/* Tombol Panah Kiri / Kanan Opsional */}
+                {hasMedia && mediaList.length > 1 && (
+                  <>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const newIndex =
+                          (mediaIndex - 1 + mediaList.length) % mediaList.length;
+                        setMediaIndex(newIndex);
+                        const container = document.getElementById(
+                          "media-carousel-container"
+                        );
+                        if (container) {
+                          container.scrollTo({
+                            left: newIndex * container.clientWidth,
+                            behavior: "smooth",
+                          });
+                        }
+                      }}
+                      className={`absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full backdrop-blur-md flex items-center justify-center transition-all text-xs font-mono cursor-pointer shadow-md z-10 ${
+                        isLight
+                          ? "bg-white/90 text-slate-800 border border-slate-200 hover:bg-accent-blue hover:text-white"
+                          : "bg-black/60 text-white border border-white/10 hover:bg-accent-blue"
+                      }`}
+                    >
+                      ❮
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const newIndex = (mediaIndex + 1) % mediaList.length;
+                        setMediaIndex(newIndex);
+                        const container = document.getElementById(
+                          "media-carousel-container"
+                        );
+                        if (container) {
+                          container.scrollTo({
+                            left: newIndex * container.clientWidth,
+                            behavior: "smooth",
+                          });
+                        }
+                      }}
+                      className={`absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full backdrop-blur-md flex items-center justify-center transition-all text-xs font-mono cursor-pointer shadow-md z-10 ${
+                        isLight
+                          ? "bg-white/90 text-slate-800 border border-slate-200 hover:bg-accent-blue hover:text-white"
+                          : "bg-black/60 text-white border border-white/10 hover:bg-accent-blue"
+                      }`}
+                    >
+                      ❯
+                    </button>
+                  </>
+                )}
               </div>
 
-              {/* Media Indicator Dots */}
+              {/* Media Indicator Bar & Dots */}
               {hasMedia && (
                 <div className="flex items-center justify-between px-1">
                   <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider">
@@ -197,7 +240,18 @@ export const ProjectsModal: React.FC<ProjectsModalProps> = ({ isOpen }) => {
                     {mediaList.map((_, idx) => (
                       <button
                         key={idx}
-                        onClick={() => setMediaIndex(idx)}
+                        onClick={() => {
+                          setMediaIndex(idx);
+                          const container = document.getElementById(
+                            "media-carousel-container"
+                          );
+                          if (container) {
+                            container.scrollTo({
+                              left: idx * container.clientWidth,
+                              behavior: "smooth",
+                            });
+                          }
+                        }}
                         className={`h-1.5 rounded-full transition-all cursor-pointer ${
                           mediaIndex === idx
                             ? "w-5 bg-accent-blue"
@@ -230,7 +284,9 @@ export const ProjectsModal: React.FC<ProjectsModalProps> = ({ isOpen }) => {
                     // Key Features
                   </span>
                   <ul
-                    className={`text-xs space-y-1 font-mono pl-4 list-disc ${isLight ? "text-slate-600" : "text-slate-300"}`}
+                    className={`text-xs space-y-1 font-mono pl-4 list-disc ${
+                      isLight ? "text-slate-600" : "text-slate-300"
+                    }`}
                   >
                     {currentProject.keyFeatures.map((feature, idx) => (
                       <li key={idx}>{feature}</li>
@@ -263,7 +319,7 @@ export const ProjectsModal: React.FC<ProjectsModalProps> = ({ isOpen }) => {
         </AnimatePresence>
       </div>
 
-      {/* Modal Footer: Dilengkapi Indikator Dot Minimalis untuk Project List */}
+      {/* Modal Footer */}
       <div
         className={`flex flex-col sm:flex-row items-center justify-between px-6 py-4 border-t gap-3 shrink-0 ${
           isLight
@@ -315,7 +371,7 @@ export const ProjectsModal: React.FC<ProjectsModalProps> = ({ isOpen }) => {
             </button>
           </div>
 
-          {/* Indikator Titik (Dots) untuk Total Project di Footer */}
+          {/* Indikator Titik (Dots) untuk Total Project */}
           <div className="hidden md:flex items-center gap-1.5 px-2">
             {PROJECTS_DATA.map((_, idx) => (
               <button
