@@ -54,10 +54,9 @@ export const SystemProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const toggleLang = () => setLang((prev) => (prev === 'EN' ? 'ID' : 'EN'));
   const toggleTheme = () => {
-    startTransition(() => {
-      setTheme((prev) => {
-        const nextTheme = prev === 'dark' ? 'light' : 'dark';
-        return nextTheme;
+    requestAnimationFrame(() => {
+      startTransition(() => {
+        setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
       });
     });
   };

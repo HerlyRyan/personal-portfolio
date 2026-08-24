@@ -66,8 +66,11 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
           onClick={(e) => e.stopPropagation()}
           className={`
             fixed inset-4 m-auto z-50 w-auto max-w-lg max-h-[85vh] rounded-3xl overflow-hidden shadow-2xl flex flex-col border lg:backdrop-blur-xl transform-gpu will-change-transform
-            lg:absolute lg:inset-auto lg:top-0 lg:left-[calc(100%+16px)] lg:w-[440px] lg:m-0 lg:max-h-[85vh]
-            }
+            lg:absolute lg:inset-auto lg:top-0 lg:left-[calc(100%+16px)] lg:w-[440px] lg:m-0 lg:max-h-[85vh] ${
+            isLight
+              ? 'bg-white border-slate-200'
+              : 'bg-dark-card border-dark-border'
+          }
           `}
         >
           {/* Header Panel */}

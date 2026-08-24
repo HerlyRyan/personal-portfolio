@@ -1,12 +1,12 @@
 @import "tailwindcss";
 
 @theme {
-  --color-dark-bg: #050505;
-  --color-dark-card: #0a0d14;
-  --color-dark-border: #1e2530;
+  --color-dark-bg: var(--bg-main, #050505);
+  --color-dark-card: var(--bg-card, #0a0d14);
+  --color-dark-border: var(--border-color, #1e2530);
   
-  --color-navy-base: #0b0f19;
-  --color-navy-deep: #070a10;
+  --color-navy-base: var(--bg-sidebar, #0b0f19);
+  --color-navy-deep: var(--bg-deep, #070a10);
   
   --color-accent-blue: #3b82f6;
   --color-accent-subtle: #1d4ed8;
@@ -14,67 +14,40 @@
   --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
 }
 
-/* Base layer styling untuk dark theme konsisten */
+/* Base layer styling menggunakan CSS Variables agar perpindahan tema instan & bebas stutter */
+:root {
+  --bg-main: #050505;
+  --bg-card: #0a0d14;
+  --border-color: #1e2530;
+  --bg-sidebar: #0b0f19;
+  --bg-deep: #070a10;
+  --text-main: #f8fafc;
+}
+
+html.light-theme {
+  color-scheme: light;
+  --bg-main: #f1f5f9;
+  --bg-card: #ffffff;
+  --border-color: #cbd5e1;
+  --bg-sidebar: #f8fafc;
+  --bg-deep: #e2e8f0;
+  --text-main: #0f172a;
+}
+
 @layer base {
   body {
-    background-color: var(--color-dark-bg);
-    color: #f8fafc;
+    background-color: var(--bg-main);
+    color: var(--text-main);
     font-family: var(--font-sans);
     overflow-x: hidden;
   }
 }
 
-/* Aturan kustom untuk Light Mode */
-.light-theme {
-  background-color: #f1f5f9 !important; /* Latar belakang luar */
-  color: #0f172a !important;
-}
-
-.light-theme .bg-dark {
-  background-color: #f1f5f9 !important;
-}
-
-/* Kartu Utama */
-.light-theme .bg-dark-card {
-  background-color: #ffffff !important;
-  border-color: #cbd5e1 !important;
-}
-
-/* Sidebar Profil di sebelah kiri (yang tadinya gelap) */
-.light-theme .bg-navy-base {
-  background-color: #f8fafc !important;
-  border-color: #e2e8f0 !important;
-}
-
-.light-theme .border-dark-border {
-  border-color: #e2e8f0 !important;
-}
-
-/* Teks dan warna judul */
-.light-theme .text-white {
-  color: #0f172a !important;
-}
-
-.light-theme .text-slate-100,
-.light-theme .text-slate-300,
-.light-theme .text-slate-400 {
-  color: #475569 !important;
-}
-
-.light-theme .text-slate-500 {
-  color: #64748b !important;
-}
-
-/* Tombol Modul di Bagian Bawah & Elemen Border */
-.light-theme .bg-dark-border\/40,
-.light-theme .bg-dark-border\/50 {
-  background-color: #f1f5f9 !important;
-  border-color: #cbd5e1 !important;
-}
-
-.light-theme .hover\:bg-dark-border:hover {
-  background-color: #e2e8f0 !important;
-}
+/* 
+  Catatan: Seluruh aturan .light-theme manual yang panjang di bawah 
+  sudah dihapus total karena warnanya kini otomatis di-handle 
+  oleh CSS Variables di atas secara instan tanpa membebani CPU!
+*/
 
 /* 1. Mengatur lebar dan border-radius container scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
@@ -90,23 +63,14 @@
 
 /* 3. Styling Batang (Thumb) Scrollbar untuk Dark Mode */
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(75, 85, 99, 0.4); /* Warna abu-abu transparan elegan */
+  background: rgba(75, 85, 99, 0.4);
   border-radius: 9999px;
-  border: 2px solid transparent; /* Memberikan efek padding di dalam track */
-  background-clip: content-box;
-}
-
-/* 4. Styling Batang (Thumb) Scrollbar untuk Light Mode (jika parent memiliki class tertentu atau diatur via state) */
-.light .custom-scrollbar::-webkit-scrollbar-thumb,
-.is-light .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(203, 213, 225, 0.8); /* Warna abu-abu terang untuk light mode */
   border: 2px solid transparent;
   background-clip: content-box;
 }
 
-/* Efek saat di-hover */
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(59, 130, 246, 0.8); /* Berubah jadi accent-blue saat di-hover */
+  background: rgba(59, 130, 246, 0.8);
   background-clip: content-box;
 }
 
@@ -145,27 +109,18 @@
   animation: orbitRed 30s linear infinite;
 }
 
-/* --- OPTIMASI KHUSUS PERANGKAT MOBILE (Mencegah Lagging Animasi & Ganti Tema) --- */
+/* --- OPTIMASI KHUSUS PERANGKAT MOBILE & LAPTOP LAMA --- */
 @media (max-width: 768px) {
-  /* Nonaktifkan efek blur yang berat di mobile, ganti dengan warna solid semi-transparan */
   .backdrop-blur-xl,
   .backdrop-blur-sm,
   .backdrop-blur-xs {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
   }
-
-  /* Ringankan transisi warna saat ganti tema di mobile agar tidak memicu reflow berat */
-  *, ::before, ::after {
-    transition-property: color, background-color, border-color !important;
-    transition-duration: 150ms !important;
-    transition-timing-function: ease !important;
-  }
 }
 
-/* Jangan render ulang atau hitung layout elemen yang tertutup modal atau di luar viewport */
 .modal-content-container, 
 .system-card-bg {
   content-visibility: auto;
-  contain-intrinsic-size: 0 500px; /* Estimasi ukuran default */
+  contain-intrinsic-size: 0 500px;
 }
