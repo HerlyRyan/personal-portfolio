@@ -17,8 +17,6 @@ interface SystemContextType {
   loadingPath: string | null;
   openModal: (id: ModalType, path: string) => void;
   closeModal: (exitPath?: string) => void;
-  toastMessage: string | null;
-  showToast: (message: string) => void;
   confirmUrl: string | null;
   requestExternalUrl: (url: string) => void;
   clearExternalUrl: () => void;
@@ -54,12 +52,6 @@ export const SystemProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const systemLang = lang === 'ID' ? id : en;
 
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const showToast = (message: string) => {
-    setToastMessage(message);
-    setTimeout(() => setToastMessage(null), 2000); // Pesan hilang setelah 2 detik
-  };
-
   const toggleLang = () => setLang((prev) => (prev === 'EN' ? 'ID' : 'EN'));
   const toggleTheme = () => {
     startTransition(() => {
@@ -68,10 +60,6 @@ export const SystemProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         return nextTheme;
       });
     });
-    // Jalankan toast di luar transisi agar tidak membebani state utama
-    setTimeout(() => {
-      showToast(`Theme switched`);
-    }, 100);
   };
 
   // Fungsi global untuk membuka modal dengan efek loading path
@@ -116,8 +104,6 @@ export const SystemProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         loadingPath,
         openModal,
         closeModal,
-        toastMessage,
-        showToast,
         confirmUrl,
         requestExternalUrl,
         clearExternalUrl

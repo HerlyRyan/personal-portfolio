@@ -1,5 +1,5 @@
 import React from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { ProfileSidebar } from '../sections/ProfileSidebar';
 import { SystemOverview } from '../sections/SystemOverview';
 import { ControlDock } from './ControlDock';
@@ -10,7 +10,7 @@ import { AboutModal } from '../sections/AboutModal';
 import { useSystem } from '../../context/SystemContext';
 
 export const SystemCardLayout: React.FC = () => {
-  const { lang, toggleLang, theme, toggleTheme, activeModal, loadingPath, toastMessage } = useSystem();
+  const { lang, toggleLang, theme, toggleTheme, activeModal, loadingPath } = useSystem();
   const isLight = theme === 'light';
 
   const isExitAction = loadingPath === '~/sys/home';
@@ -40,20 +40,6 @@ export const SystemCardLayout: React.FC = () => {
           </div>
         </div>
       )}
-
-      {/* Toast Notification Component */}
-      <AnimatePresence>
-        {toastMessage && (
-          <motion.div
-            initial={{ opacity: 0, y: -20, x: '-50%' }}
-            animate={{ opacity: 1, y: 0, x: '-50%' }}
-            exit={{ opacity: 0, y: -20, x: '-50%' }}
-            className="fixed top-8 left-1/2 z-[150] px-4 py-2 rounded-full bg-accent-blue/20 border border-accent-blue/50 text-accent-blue text-xs font-mono backdrop-blur-md shadow-lg"
-          >
-            {toastMessage}
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* TOGGLE CONTROLS (Bahasa & Tema) */}
       <div className="w-full flex justify-end gap-2 mb-3 max-w-6xl">
