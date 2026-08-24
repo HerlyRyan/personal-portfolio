@@ -1,23 +1,50 @@
+export interface SkillItem {
+  name: string;
+  level: "Advanced" | "Intermediate" | "Beginner";
+}
+
 export interface SkillCategory {
   categoryName: string;
-  skills: string[];
+  skills: SkillItem[];
 }
 
 export const SKILLS_DATA: SkillCategory[] = [
   {
     categoryName: "Frontend Development",
-    skills: ["React", "TypeScript", "JavaScript", "Tailwind CSS", "HTML5", "CSS3", "Vite"]
+    skills: [
+      { name: "React", level: "Intermediate" },
+      { name: "TypeScript", level: "Advanced" },
+      { name: "JavaScript", level: "Advanced" },
+      { name: "Tailwind CSS", level: "Advanced" },
+      { name: "HTML5", level: "Advanced" },
+      { name: "CSS3", level: "Advanced" },
+      { name: "Vite", level: "Intermediate" },
+    ]
   },
   {
     categoryName: "Backend & Frameworks",
-    skills: ["Node.js", "PHP", "Laravel", "RESTful APIs"]
+    skills: [
+      { name: "Node.js", level: "Intermediate" },
+      { name: "PHP", level: "Advanced" },
+      { name: "Laravel", level: "Advanced" },
+      { name: "RESTful APIs", level: "Advanced" },
+    ]
   },
   {
     categoryName: "Mobile Development",
-    skills: ["Flutter", "Dart"]
+    skills: [
+      { name: "Flutter", level: "Advanced" },
+      { name: "Dart", level: "Advanced" },
+    ]
   },
   {
     categoryName: "Database & Tools",
-    skills: ["MySQL", "Git", "GitHub", "VS Code", "Postman"]
+    skills: [
+      { name: "MySQL", level: "Advanced" },
+      { name: "Git", level: "Advanced" },
+      { name: "GitHub", level: "Advanced" },
+      { name: "VS Code", level: "Advanced" },
+      { name: "Postman", level: "Intermediate" },
+    ]
   }
 ];
