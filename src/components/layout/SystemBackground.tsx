@@ -11,7 +11,7 @@ export const SystemBackground: React.FC<SystemBackgroundProps> = ({ children }) 
   const isLight = theme === 'light';
 
   return (
-    <div className={`h-screen md:h-screen w-full relative flex flex-col justify-between md:overflow-hidden transition-colors duration-200 ${
+    <div className={`min-h-[100dvh] h-full w-full relative flex flex-col justify-between overflow-x-hidden md:overflow-hidden transition-colors duration-200 ${
         isLight ? 'bg-slate-100 text-slate-800' : 'bg-[#07090e] text-slate-100'
         }`}>
       

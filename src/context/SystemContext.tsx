@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import React, { createContext, useContext, useState, useEffect, startTransition } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { id } from '../locales/id';
 import { en } from '../locales/en';
 
@@ -54,9 +54,11 @@ export const SystemProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const toggleLang = () => setLang((prev) => (prev === 'EN' ? 'ID' : 'EN'));
   const toggleTheme = () => {
+    document.documentElement.classList.add('theme-switching');
+    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
     requestAnimationFrame(() => {
-      startTransition(() => {
-        setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+      requestAnimationFrame(() => {
+        document.documentElement.classList.remove('theme-switching');
       });
     });
   };

@@ -34,7 +34,6 @@ export const PROJECTS_DATA: Project[] = [
     liveUrl: "https://inventory-system-demo.vercel.app",
     coverImage: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=800&q=80",
     screenshots: [
-      "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=800&q=80",
       "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80"
     ]
   },
@@ -55,6 +54,10 @@ export const PROJECTS_DATA: Project[] = [
     techStack: ["React", "Vite", "Tailwind CSS", "TypeScript"],
     githubUrl: "https://github.com/USERNAME/travel-app",
     liveUrl: "https://travel-app-demo.vercel.app",
+    coverImage: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=800&q=80",
+    screenshots: [
+      "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80"
+    ]
     // screenshots dibiarkan kosong untuk menguji tampilan fallback preview
   },
 ];
