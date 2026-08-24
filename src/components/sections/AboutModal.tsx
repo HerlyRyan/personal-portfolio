@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ABOUT_DATA } from "../../data/aboutData";
 import { useModalEffect } from "../../hooks/useModalEfffect";
 import { useSystem } from "../../context/SystemContext";
+import { ModalHeader } from "../commons/ModalHeader";
 
 interface AboutModalProps {
   isOpen: boolean;
@@ -19,7 +20,7 @@ const itemVariants = {
 
 export const AboutModal: React.FC<AboutModalProps> = ({ isOpen }) => {
   const { theme, closeModal } = useSystem();
-  useModalEffect(isOpen, () => closeModal('~/sys/home'));
+  useModalEffect(isOpen, () => closeModal("~/sys/home"));
   const isLight = theme === "light";
 
   if (!isOpen) return null;
@@ -30,7 +31,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen }) => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        onClick={() => closeModal('~/sys/home')}
+        onClick={() => closeModal("~/sys/home")}
         className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm font-sans"
       >
         {/* Modal Container */}
@@ -47,34 +48,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen }) => {
           }`}
         >
           {/* Modal Header */}
-          <div
-            className={`flex items-center justify-between px-6 py-4 border-b shrink-0 transition-colors ${
-              isLight
-                ? "border-slate-200 bg-slate-50/50"
-                : "border-dark-border bg-navy-base/40"
-            }`}
-          >
-            <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-accent-blue animate-pulse" />
-              <h3
-                className={`text-sm font-mono tracking-wider uppercase transition-colors ${
-                  isLight ? "text-slate-900" : "text-white"
-                }`}
-              >
-                About
-              </h3>
-            </div>
-            <button
-              onClick={() => closeModal('~/sys/home')}
-              className={`font-mono text-xs px-3 py-1.5 rounded-xl transition-all cursor-pointer border active:scale-95 ${
-                isLight
-                  ? "bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200 hover:text-slate-900"
-                  : "bg-dark-border/50 border-dark-border text-slate-400 hover:text-white"
-              }`}
-            >
-              [Esc] Close
-            </button>
-          </div>
+          <ModalHeader title="About" onClose={() => closeModal("~/sys/home")} />
 
           {/* Modal Body */}
           <div
@@ -119,8 +93,8 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen }) => {
                       className={`text-5xl md:text-7xl lg:text-[5.5rem] font-black tracking-tighter leading-none ${
                         isLight ? "text-slate-900" : "text-white"
                       }`}
-                    >                      
-                      <span className="block">{ABOUT_DATA.name}</span>                      
+                    >
+                      <span className="block">{ABOUT_DATA.name}</span>
                     </h2>
                     <div className="w-12 h-1.5 bg-accent-blue mt-4 mb-6 mx-auto lg:mx-0 rounded-full" />
                     <p className="text-sm md:text-base font-mono text-accent-blue uppercase tracking-widest font-bold">
@@ -149,17 +123,19 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen }) => {
                 >
                   {/* Efek Glow di belakang foto untuk aksen modern */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent z-10 pointer-events-none" />
-                  
+
                   {ABOUT_DATA.avatarUrl ? (
                     <img
                       src={ABOUT_DATA.avatarUrl}
                       alt="Profile"
                       className="w-full h-full object-cover z-0"
-                      style={{ objectPosition: 'center 20%' }} // Memastikan fokus pada wajah/badan atas
+                      style={{ objectPosition: "center 20%" }} // Memastikan fokus pada wajah/badan atas
                     />
                   ) : (
                     <div className="text-center p-6 space-y-4 z-0">
-                      <span className="text-6xl md:text-8xl block opacity-80">👨‍💻</span>
+                      <span className="text-6xl md:text-8xl block opacity-80">
+                        👨‍💻
+                      </span>
                       <p
                         className={`text-sm font-mono tracking-widest ${isLight ? "text-slate-500" : "text-slate-400"}`}
                       >
