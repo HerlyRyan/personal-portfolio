@@ -1,3 +1,8 @@
+import { aboutId } from './data/aboutData.ts';
+import { experienceId } from './data/experienceData.ts';
+import { projectsId } from './data/projectsData.ts';
+import { skills } from './data/skillsData.ts';
+
 export const id = {
   profileSidebar: {
     status: 'Tersedia',
@@ -10,4 +15,8 @@ export const id = {
       'Berfokus pada perancangan arsitektur backend yang kokoh, manajemen database terstruktur, dan integrasi sistem berperforma tinggi untuk mendukung produktivitas enterprise secara menyeluruh.',
     secureConnection: '[Koneksi Aman]',
   },
+  projectsModal: projectsId,
+  experienceModal: experienceId,
+  skillsModal: skills,
+  aboutModal: aboutId,
 };
