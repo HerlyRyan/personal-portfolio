@@ -13,7 +13,7 @@ interface ProjectsModalProps {
 export const ProjectsModal: React.FC<ProjectsModalProps> = ({ isOpen }) => {
   const { theme, closeModal, requestExternalUrl } = useSystem();
 
-  useModalEffect(isOpen, () => closeModal("~/sys/home"));
+  useModalEffect(isOpen, () => closeModal("~/sys/home"), "projects");
 
   const isLight = theme === "light";
 
@@ -156,7 +156,7 @@ export const ProjectsModal: React.FC<ProjectsModalProps> = ({ isOpen }) => {
                     {mediaList.map((mediaUrl, idx) => (
                       <div
                         key={idx}
-                        className="w-full h-full flex-shrink-0 snap-center relative"
+                        className="w-full h-full shrink-0 snap-center relative"
                       >
                         <img
                           src={mediaUrl}

@@ -45,7 +45,7 @@ export const SystemCardLayout: React.FC = () => {
     >
       {/* Terminal Loading Overlay */}
       {loadingPath && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-xs animate-fadeIn font-mono">
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/60 backdrop-blur-xs animate-fadeIn font-mono">
           <div
             className={`px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 overflow-hidden ${
               isLight
@@ -98,7 +98,7 @@ export const SystemCardLayout: React.FC = () => {
 
           {/* Pemisah Vertikal Tipis */}
           <div
-            className={`w-[1px] h-4 ${isLight ? "bg-slate-300" : "bg-dark-border"}`}
+            className={`w-px h-4 ${isLight ? "bg-slate-300" : "bg-dark-border"}`}
           />
 
           {/* Tombol Tema (Theme Switcher) */}

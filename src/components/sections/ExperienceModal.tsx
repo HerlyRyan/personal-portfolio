@@ -11,7 +11,7 @@ interface ExperienceModalProps {
 
 export const ExperienceModal: React.FC<ExperienceModalProps> = ({ isOpen }) => {
   const { theme, closeModal } = useSystem();
-  useModalEffect(isOpen, () => closeModal("~/sys/home"));
+  useModalEffect(isOpen, () => closeModal("~/sys/home"), "experiences");
   const isLight = theme === "light";
 
   const [selectedTech, setSelectedTech] = useState<string | null>(null);
@@ -83,7 +83,7 @@ export const ExperienceModal: React.FC<ExperienceModalProps> = ({ isOpen }) => {
 
         {/* Garis Pembatas Tipis */}
         <div
-          className={`h-[1px] w-full ${isLight ? "bg-slate-200" : "bg-dark-border"}`}
+          className={`h-px w-full ${isLight ? "bg-slate-200" : "bg-dark-border"}`}
         />
 
         {/* Timeline / Experience List */}
@@ -91,7 +91,7 @@ export const ExperienceModal: React.FC<ExperienceModalProps> = ({ isOpen }) => {
           {filteredExperience.map((item, index) => (
             <div key={item.id || index} className="relative group">
               {/* Titik Timeline dengan efek terisi penuh (solid) saat di-hover */}
-              <div className="absolute -left-[29px] sm:-left-[33px] top-1.5 w-3.5 h-3.5 rounded-full border-2 border-accent-blue bg-navy-base transition-all duration-300 group-hover:bg-accent-blue group-hover:scale-125 group-hover:shadow-[0_0_10px_rgba(59,130,246,0.6)]" />
+              <div className="absolute -left-7.25 sm:-left-8.25 top-1.5 w-3.5 h-3.5 rounded-full border-2 border-accent-blue bg-navy-base transition-all duration-300 group-hover:bg-accent-blue group-hover:scale-125 group-hover:shadow-[0_0_10px_rgba(59,130,246,0.6)]" />
 
               <div
                 className={`border rounded-2xl p-5 sm:p-6 transition-all ${

@@ -21,7 +21,7 @@ const itemVariants = {
 
 export const AboutModal: React.FC<AboutModalProps> = ({ isOpen }) => {
   const { theme, closeModal } = useSystem();
-  useModalEffect(isOpen, () => closeModal("~/sys/home"));
+  useModalEffect(isOpen, () => closeModal("~/sys/home"), "about");
   const isLight = theme === "light";
 
   if (!isOpen) return null;
@@ -49,7 +49,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen }) => {
           className={`border rounded-3xl relative overflow-hidden transition-all ${
             isLight
               ? "bg-slate-50 border-slate-200 shadow-sm"
-              : "bg-gradient-to-br from-[#1c2230] to-[#121824] border-dark-border"
+              : "bg-linear-to-br from-[#1c2230] to-[#121824] border-dark-border"
           }`}
         >
           <div className="flex flex-col lg:flex-row items-center justify-between p-6 sm:p-8 gap-6">
@@ -96,13 +96,13 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen }) => {
             <motion.div
               whileHover={{ scale: 1.01 }}
               transition={{ duration: 0.3 }}
-              className={`w-[220px] sm:w-[240px] h-[300px] sm:h-[320px] rounded-2xl border shrink-0 overflow-hidden flex items-center justify-center relative shadow-xl mx-auto lg:mx-0 ${
+              className={`w-55 sm:w-60 h-75 sm:h-80 rounded-2xl border shrink-0 overflow-hidden flex items-center justify-center relative shadow-xl mx-auto lg:mx-0 ${
                 isLight
                   ? "bg-slate-200 border-slate-300"
                   : "bg-[#252c3c] border-slate-700/50"
               }`}
             >
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent z-10 pointer-events-none" />
+              <div className="absolute inset-0 bg-linear-to-t from-black/20 via-transparent to-transparent z-10 pointer-events-none" />
 
               {ABOUT_DATA.avatarUrl ? (
                 <img
@@ -139,7 +139,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen }) => {
             }`}
           >
             <h4 className="text-[11px] font-mono text-accent-blue tracking-widest uppercase mb-3 flex items-center gap-2.5">
-              <span className="w-5 h-[1px] bg-accent-blue" />
+              <span className="w-5 h-px bg-accent-blue" />
               Background Story
             </h4>
             <div
