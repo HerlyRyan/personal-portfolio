@@ -12,7 +12,7 @@ interface SkillsModalProps {
 
 export const SkillsModal: React.FC<SkillsModalProps> = ({ isOpen }) => {
   const { theme, closeModal } = useSystem();
-  useModalEffect(isOpen, () => closeModal('~/sys/home'), "skills");
+  useModalEffect(isOpen, () => closeModal('~/sys/home'));
   const isLight = theme === 'light';
 
   // State untuk melacak kategori mana yang sedang terbuka (default kategori pertama terbuka)

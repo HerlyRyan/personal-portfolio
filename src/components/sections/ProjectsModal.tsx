@@ -13,7 +13,7 @@ interface ProjectsModalProps {
 export const ProjectsModal: React.FC<ProjectsModalProps> = ({ isOpen }) => {
   const { theme, closeModal, requestExternalUrl } = useSystem();
 
-  useModalEffect(isOpen, () => closeModal("~/sys/home"), "projects");
+  useModalEffect(isOpen, () => closeModal("~/sys/home"));
 
   const isLight = theme === "light";
 
@@ -141,7 +141,7 @@ export const ProjectsModal: React.FC<ProjectsModalProps> = ({ isOpen }) => {
                         setMediaIndex(newIndex);
                       }
                     }}
-                    className="w-full h-full flex overflow-x-auto snap-x snap-mandatory scroll-smooth"
+                    className="w-full h-full flex overflow-x-auto snap-x snap-mandatory scroll-smooth touch-pan-x overscroll-x-contain"
                     style={{
                       scrollbarWidth: "none",
                       msOverflowStyle: "none",

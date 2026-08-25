@@ -11,7 +11,7 @@ interface ExperienceModalProps {
 
 export const ExperienceModal: React.FC<ExperienceModalProps> = ({ isOpen }) => {
   const { theme, closeModal } = useSystem();
-  useModalEffect(isOpen, () => closeModal("~/sys/home"), "experiences");
+  useModalEffect(isOpen, () => closeModal("~/sys/home"));
   const isLight = theme === "light";
 
   const [selectedTech, setSelectedTech] = useState<string | null>(null);

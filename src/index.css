@@ -151,3 +151,7 @@
 .theme-switching, .theme-switching * {
   transition: none !important;
 }
+
+html, body {
+  overscroll-behavior-x: none;
+}

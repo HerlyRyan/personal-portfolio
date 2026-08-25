@@ -21,7 +21,7 @@ const itemVariants = {
 
 export const AboutModal: React.FC<AboutModalProps> = ({ isOpen }) => {
   const { theme, closeModal } = useSystem();
-  useModalEffect(isOpen, () => closeModal("~/sys/home"), "about");
+  useModalEffect(isOpen, () => closeModal("~/sys/home"));
   const isLight = theme === "light";
 
   if (!isOpen) return null;
