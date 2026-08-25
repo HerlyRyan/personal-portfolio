@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { ABOUT_DATA } from "../../data/aboutData";
+import { SITE_METADATA } from "../../constants/siteConfig";
 import { useModalEffect } from "../../hooks/useModalEfffect";
 import { useSystem } from "../../context/SystemContext";
 import { ModalHeader } from "../commons/ModalHeader";
@@ -20,16 +20,19 @@ const itemVariants = {
 };
 
 export const AboutModal: React.FC<AboutModalProps> = ({ isOpen }) => {
-  const { theme, closeModal } = useSystem();
+  const { theme, closeModal, systemLang } = useSystem();
   useModalEffect(isOpen, () => closeModal("~/sys/home"));
   const isLight = theme === "light";
+
+  // Langsung ambil dari systemLang.aboutModal
+  const t = systemLang.aboutModal;
 
   if (!isOpen) return null;
 
   return (
     <ModalContainer>
       {/* Modal Header */}
-      <ModalHeader title="About" onClose={() => closeModal("~/sys/home")} />
+      <ModalHeader title={t.title} onClose={() => closeModal("~/sys/home")} />
 
       {/* Modal Body */}
       <div
@@ -65,7 +68,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen }) => {
                       : "text-emerald-400 font-bold tracking-wide"
                   }
                 >
-                  {ABOUT_DATA.availability}
+                  {t.availability}
                 </span>
               </div>
 
@@ -75,11 +78,11 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen }) => {
                     isLight ? "text-slate-900" : "text-white"
                   }`}
                 >
-                  <span>{ABOUT_DATA.name}</span>
+                  <span>{SITE_METADATA.name}</span>
                 </h2>
                 <div className="w-8 h-1 bg-accent-blue my-2.5 mx-auto lg:mx-0 rounded-full" />
                 <p className="text-xs font-mono text-accent-blue uppercase tracking-wider font-semibold">
-                  {ABOUT_DATA.role} — {ABOUT_DATA.location}
+                  {t.role} — {t.location}
                 </p>
               </div>
 
@@ -88,11 +91,11 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen }) => {
                   isLight ? "text-slate-600" : "text-slate-300"
                 }`}
               >
-                {ABOUT_DATA.introduction}
+                {t.introduction}
               </p>
             </div>
 
-            {/* BAGIAN KANAN: Foto Profil (Diubah menjadi bentuk portrait tegak) */}
+            {/* BAGIAN KANAN: Foto Profil */}
             <motion.div
               whileHover={{ scale: 1.01 }}
               transition={{ duration: 0.3 }}
@@ -104,12 +107,12 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen }) => {
             >
               <div className="absolute inset-0 bg-linear-to-t from-black/20 via-transparent to-transparent z-10 pointer-events-none" />
 
-              {ABOUT_DATA.avatarUrl ? (
+              {SITE_METADATA.avatarUrl ? (
                 <img
-                  src={ABOUT_DATA.avatarUrl}
+                  src={SITE_METADATA.avatarUrl}
                   alt="Profile"
                   className="w-full h-full object-cover z-0"
-                  style={{ objectPosition: "center top" }} // Mengatur fokus ke bagian atas (wajah)
+                  style={{ objectPosition: "center top" }}
                 />
               ) : (
                 <div className="text-center p-6 space-y-2 z-0">
@@ -140,12 +143,12 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen }) => {
           >
             <h4 className="text-[11px] font-mono text-accent-blue tracking-widest uppercase mb-3 flex items-center gap-2.5">
               <span className="w-5 h-px bg-accent-blue" />
-              Background Story
+              {t.backgroundTitle}
             </h4>
             <div
               className={`space-y-2.5 text-xs sm:text-sm leading-relaxed ${isLight ? "text-slate-600" : "text-slate-300"}`}
             >
-              {ABOUT_DATA.biography.map((paragraph, idx) => (
+              {t.biography.map((paragraph, idx) => (
                 <p key={idx}>{paragraph}</p>
               ))}
             </div>
@@ -158,7 +161,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen }) => {
             animate="visible"
             className="flex flex-col gap-3.5"
           >
-            {ABOUT_DATA.principles.map((principle, idx) => (
+            {t.principles.map((principle, idx) => (
               <motion.div
                 key={idx}
                 variants={itemVariants}

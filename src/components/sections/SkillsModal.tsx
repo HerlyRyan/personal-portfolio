@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { SKILLS_DATA } from '../../data/skillsData';
 import { useModalEffect } from '../../hooks/useModalEfffect';
 import { useSystem } from '../../context/SystemContext';
 import { ModalHeader } from '../commons/ModalHeader';
@@ -11,9 +10,12 @@ interface SkillsModalProps {
 }
 
 export const SkillsModal: React.FC<SkillsModalProps> = ({ isOpen }) => {
-  const { theme, closeModal } = useSystem();
+  const { theme, closeModal, systemLang } = useSystem();
+  
   useModalEffect(isOpen, () => closeModal('~/sys/home'));
+  
   const isLight = theme === 'light';
+  const t = systemLang.skillsModal;
 
   // State untuk melacak kategori mana yang sedang terbuka (default kategori pertama terbuka)
   const [openIndex, setOpenIndex] = useState<number | null>(0);
@@ -28,7 +30,7 @@ export const SkillsModal: React.FC<SkillsModalProps> = ({ isOpen }) => {
     <ModalContainer>
       {/* Modal Header */}
       <ModalHeader
-        title='Skills Stack'
+        title={t.title}
         onClose={() => closeModal('~/sys/home')}
       />
 
@@ -45,13 +47,13 @@ export const SkillsModal: React.FC<SkillsModalProps> = ({ isOpen }) => {
         {/* Deskripsi Singkat untuk Recruiter */}
         <div className="px-1 mb-2">
           <p className={`text-xs font-mono ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
-            // Click category below to expand core technical proficiencies, frameworks, and tools.
+            {t.description}
           </p>
         </div>
 
         {/* Stack Vertikal Accordion */}
         <div className='space-y-3'>
-          {SKILLS_DATA.map((group, idx) => {
+          {t.skillsData.map((group, idx) => {
             const isOpenAccordion = openIndex === idx;
             return (
               <div
@@ -81,7 +83,7 @@ export const SkillsModal: React.FC<SkillsModalProps> = ({ isOpen }) => {
                   {/* Indikator Jumlah Skill & Ikon Minimalis (+ / -) */}
                   <div className='flex items-center gap-3'>
                     <span className={`text-[10px] font-mono px-2 py-0.5 rounded-md ${isLight ? 'bg-slate-200 text-slate-600' : 'bg-dark-border text-slate-400'}`}>
-                      {group.skills.length} items
+                      {group.skills.length} {t.itemsLabel}
                     </span>
                     <motion.span 
                       animate={{ rotate: isOpenAccordion ? 180 : 0 }}

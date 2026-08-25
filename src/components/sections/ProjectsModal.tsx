@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { PROJECTS_DATA } from "../../data/projectsData";
 import { useModalEffect } from "../../hooks/useModalEfffect.ts";
 import { useSystem } from "../../context/SystemContext";
 import { ModalHeader } from "../commons/ModalHeader.tsx";
@@ -11,19 +10,20 @@ interface ProjectsModalProps {
 }
 
 export const ProjectsModal: React.FC<ProjectsModalProps> = ({ isOpen }) => {
-  const { theme, closeModal, requestExternalUrl } = useSystem();
+  const { theme, closeModal, requestExternalUrl, systemLang } = useSystem();
 
   useModalEffect(isOpen, () => closeModal("~/sys/home"));
 
   const isLight = theme === "light";
+  const t = systemLang.projectsModal;
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [mediaIndex, setMediaIndex] = useState(0);
 
   if (!isOpen) return null;
 
-  const currentProject = PROJECTS_DATA[currentIndex];
-  const totalProjects = PROJECTS_DATA.length;
+  const currentProject = t.projectsList[currentIndex];
+  const totalProjects = t.projectsList.length;
 
   const isFirstProject = currentIndex === 0;
   const isLastProject = currentIndex === totalProjects - 1;
@@ -42,8 +42,8 @@ export const ProjectsModal: React.FC<ProjectsModalProps> = ({ isOpen }) => {
     }
   };
 
-  const prevProject = !isFirstProject ? PROJECTS_DATA[currentIndex - 1] : null;
-  const nextProject = !isLastProject ? PROJECTS_DATA[currentIndex + 1] : null;
+  const prevProject = !isFirstProject ? t.projectsList[currentIndex - 1] : null;
+  const nextProject = !isLastProject ? t.projectsList[currentIndex + 1] : null;
 
   const mediaList = [
     ...(currentProject.coverImage ? [currentProject.coverImage] : []),
@@ -54,7 +54,7 @@ export const ProjectsModal: React.FC<ProjectsModalProps> = ({ isOpen }) => {
   return (
     <ModalContainer>
       {/* Modal Header */}
-      <ModalHeader title="Projects" onClose={() => closeModal("~/sys/home")} />
+      <ModalHeader title={t.title} onClose={() => closeModal("~/sys/home")} />
 
       {/* Modal Body */}
       <div
@@ -105,12 +105,12 @@ export const ProjectsModal: React.FC<ProjectsModalProps> = ({ isOpen }) => {
                         : "bg-dark-border/40 text-slate-300 border-dark-border"
                     }`}
                   >
-                    👤 Role: {currentProject.role}
+                    👤 {t.roleLabel}: {currentProject.role}
                   </span>
                 )}
                 {currentProject.metrics && (
                   <span className="text-[11px] font-mono px-3 py-1.5 rounded-xl border bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
-                    ⚡ Impact: {currentProject.metrics}
+                    ⚡ {t.impactLabel}: {currentProject.metrics}
                   </span>
                 )}
               </div>
@@ -174,7 +174,7 @@ export const ProjectsModal: React.FC<ProjectsModalProps> = ({ isOpen }) => {
                   </div>
                 )}
 
-                {/* Tombol Panah Kiri / Kanan Opsional */}
+                {/* Tombol Panah Kiri / Kanan */}
                 {hasMedia && mediaList.length > 1 && (
                   <>
                     <button
@@ -233,8 +233,8 @@ export const ProjectsModal: React.FC<ProjectsModalProps> = ({ isOpen }) => {
                 <div className="flex items-center justify-between px-1">
                   <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider">
                     {mediaIndex === 0 && currentProject.coverImage
-                      ? "// Cover Image"
-                      : `// Screenshot ${currentProject.coverImage ? mediaIndex : mediaIndex + 1}`}
+                      ? t.coverImageLabel
+                      : `${t.screenshotLabel} ${currentProject.coverImage ? mediaIndex : mediaIndex + 1}`}
                   </span>
                   <div className="flex items-center gap-1.5">
                     {mediaList.map((_, idx) => (
@@ -281,7 +281,7 @@ export const ProjectsModal: React.FC<ProjectsModalProps> = ({ isOpen }) => {
               currentProject.keyFeatures.length > 0 && (
                 <div className="space-y-1.5">
                   <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider font-medium">
-                    // Key Features
+                    {t.keyFeaturesLabel}
                   </span>
                   <ul
                     className={`text-xs space-y-1 font-mono pl-4 list-disc ${
@@ -298,7 +298,7 @@ export const ProjectsModal: React.FC<ProjectsModalProps> = ({ isOpen }) => {
             {/* Tech Stack */}
             <div className="space-y-2">
               <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider font-medium">
-                // Tech Stack Utilized
+                {t.techStackLabel}
               </span>
               <div className="flex flex-wrap gap-2">
                 {currentProject.techStack.map((tech, idx) => (
@@ -344,9 +344,9 @@ export const ProjectsModal: React.FC<ProjectsModalProps> = ({ isOpen }) => {
               <span className="text-accent-blue font-bold">←</span>
               <span className="truncate">
                 <strong className="block text-[9px] text-slate-400 uppercase">
-                  Prev
+                  {t.prevLabel}
                 </strong>
-                {prevProject ? prevProject.title : "Start"}
+                {prevProject ? prevProject.title : t.startLabel}
               </span>
             </button>
 
@@ -363,9 +363,9 @@ export const ProjectsModal: React.FC<ProjectsModalProps> = ({ isOpen }) => {
             >
               <span className="truncate">
                 <strong className="block text-[9px] text-slate-400 uppercase">
-                  Next
+                  {t.nextLabel}
                 </strong>
-                {nextProject ? nextProject.title : "End"}
+                {nextProject ? nextProject.title : t.endLabel}
               </span>
               <span className="text-accent-blue font-bold">→</span>
             </button>
@@ -373,7 +373,7 @@ export const ProjectsModal: React.FC<ProjectsModalProps> = ({ isOpen }) => {
 
           {/* Indikator Titik (Dots) untuk Total Project */}
           <div className="hidden md:flex items-center gap-1.5 px-2">
-            {PROJECTS_DATA.map((_, idx) => (
+            {t.projectsList.map((_, idx) => (
               <button
                 key={idx}
                 onClick={() => {
@@ -399,7 +399,7 @@ export const ProjectsModal: React.FC<ProjectsModalProps> = ({ isOpen }) => {
             onClick={() => requestExternalUrl(currentProject.githubUrl!)}
             className="w-full sm:w-auto text-xs font-mono text-accent-blue bg-accent-blue/10 border border-accent-blue/20 hover:bg-accent-blue/20 px-4 py-3 rounded-xl transition-all cursor-pointer text-center shrink-0"
           >
-            Repository Code ↗
+            {t.repoButton}
           </button>
         )}
       </div>

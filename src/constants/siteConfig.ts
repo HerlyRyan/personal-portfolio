@@ -11,3 +11,8 @@ export const SITE_CONFIG = {
     email: "herlyryanth@gmail.com",
   },
 };
+
+export const SITE_METADATA = {
+  name: "Herly Riyanto Hidayat",
+  avatarUrl: "images/profile-bw-no-bg.webp",
+};

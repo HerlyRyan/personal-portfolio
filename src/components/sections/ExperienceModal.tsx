@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { EXPERIENCE_DATA } from "../../data/experienceData";
 import { useModalEffect } from "../../hooks/useModalEfffect";
 import { useSystem } from "../../context/SystemContext";
 import { ModalHeader } from "../commons/ModalHeader";
@@ -10,19 +9,22 @@ interface ExperienceModalProps {
 }
 
 export const ExperienceModal: React.FC<ExperienceModalProps> = ({ isOpen }) => {
-  const { theme, closeModal } = useSystem();
+  const { theme, closeModal, systemLang } = useSystem();
   useModalEffect(isOpen, () => closeModal("~/sys/home"));
   const isLight = theme === "light";
 
   const [selectedTech, setSelectedTech] = useState<string | null>(null);
 
+  // Ambil data berdasarkan bahasa sistem yang aktif
+  const t = systemLang.experienceModal;
+
   const allTechs = Array.from(
-    new Set(EXPERIENCE_DATA.flatMap((item) => item.techStack)),
+    new Set(t.experienceItems.flatMap((item) => item.techStack)),
   );
 
   const filteredExperience = selectedTech
-    ? EXPERIENCE_DATA.filter((item) => item.techStack.includes(selectedTech))
-    : EXPERIENCE_DATA;
+    ? t.experienceItems.filter((item) => item.techStack.includes(selectedTech))
+    : t.experienceItems;
 
   if (!isOpen) return null;
 
@@ -30,7 +32,7 @@ export const ExperienceModal: React.FC<ExperienceModalProps> = ({ isOpen }) => {
     <ModalContainer>
       {/* Modal Header */}
       <ModalHeader
-        title="Experience"
+        title={t.title}
         onClose={() => closeModal("~/sys/home")}
       />
 
@@ -48,14 +50,14 @@ export const ExperienceModal: React.FC<ExperienceModalProps> = ({ isOpen }) => {
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider">
-              // Filter by Technology
+              {t.filterTag}
             </span>
             {selectedTech && (
               <button
                 onClick={() => setSelectedTech(null)}
                 className="text-[10px] font-mono text-accent-blue hover:underline cursor-pointer"
               >
-                Reset Filter ✕
+                {t.resetFilter}
               </button>
             )}
           </div>
@@ -90,7 +92,7 @@ export const ExperienceModal: React.FC<ExperienceModalProps> = ({ isOpen }) => {
         <div className="space-y-5 relative border-l-2 border-accent-blue/30 ml-3 pl-5 sm:pl-6">
           {filteredExperience.map((item, index) => (
             <div key={item.id || index} className="relative group">
-              {/* Titik Timeline dengan efek terisi penuh (solid) saat di-hover */}
+              {/* Titik Timeline */}
               <div className="absolute -left-7.25 sm:-left-8.25 top-1.5 w-3.5 h-3.5 rounded-full border-2 border-accent-blue bg-navy-base transition-all duration-300 group-hover:bg-accent-blue group-hover:scale-125 group-hover:shadow-[0_0_10px_rgba(59,130,246,0.6)]" />
 
               <div
