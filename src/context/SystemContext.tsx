@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { id } from '../locales/id';
 import { en } from '../locales/en';
 
@@ -74,14 +74,44 @@ export const SystemProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     });
   };
 
-  // Fungsi global untuk menutup modal dengan efek loading path (bisa dipakai semua modal!)
   const closeModal = (exitPath: string = "~/sys/home") => {
     setLoadingPath(exitPath);
     setTimeout(() => {
       setLoadingPath(null);
       setActiveModal(null);
     }, 600);
+
+    if (closingViaPopState.current) {
+      // Modal ditutup KARENA back/swipe -> entry sudah otomatis "dikonsumsi" browser,
+      // jangan history.back() lagi, cukup reset flag
+      closingViaPopState.current = false;
+    } else if (window.history.state?.modalOpen) {
+      // Modal ditutup lewat cara lain (klik X, klik backdrop, dsb)
+      // -> kita yang harus "buang" entry penyangga
+      window.history.back();
+    }
   };
+
+  // Flag: apakah modal sedang ditutup KARENA popstate (back button/swipe),
+  // supaya closeModal() tidak ikut manggil history.back() lagi (double-pop)
+  const closingViaPopState = useRef(false);
+
+  // Satu-satunya tempat push/pop history untuk SEMUA modal
+  useEffect(() => {
+    if (!activeModal) return;
+
+    window.history.pushState({ modalOpen: true }, '');
+
+    const handlePopState = () => {
+      closingViaPopState.current = true;
+      closeModal(); // pakai default exitPath "~/sys/home"
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [activeModal]);  
 
   const [confirmUrl, setConfirmUrl] = useState<string | null>(null);
 
