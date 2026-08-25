@@ -7,6 +7,7 @@ import { ProjectsModal } from "../sections/ProjectsModal";
 import { ExperienceModal } from "../sections/ExperienceModal";
 import { SkillsModal } from "../sections/SkillsModal";
 import { AboutModal } from "../sections/AboutModal";
+import { SystemClockBadge } from "../commons/SystemClockBadge"; // <-- Import Komponen Jam
 import { useSystem } from "../../context/SystemContext";
 
 export const SystemCardLayout: React.FC = () => {
@@ -16,27 +17,7 @@ export const SystemCardLayout: React.FC = () => {
 
   const isExitAction = loadingPath === "~/sys/home";
 
-  // const handlePreview = () => {
-  //   // Logika membuka modal preview CV atau membuka file PDF di tab baru
-  //   window.open('https://drive.google.com/file/d/1jD0EO5Xln6LnX5qvCubZW7dWUPr8EYuv/view?usp=sharing', '_blank');
-  // };
-
-  // const handleDownload = () => {
-  //   // Logika mengunduh dokumen CV
-  //   const fileId = '1jD0EO5Xln6LnX5qvCubZW7dWUPr8EYuv';
-  //   const downloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
-
-  //   // Membuat elemen link sementara untuk memicu download
-  //   const link = document.createElement('a');
-  //   link.href = downloadUrl;
-  //   link.setAttribute('download', 'CV_Herly_Riyanto_Hidayat.pdf'); // Nama file saat diunduh
-  //   document.body.appendChild(link);
-  //   link.click();
-  //   document.body.removeChild(link);
-  // };
-
   return (
-    // PERUBAHAN DI SINI: Hapus my-auto, gunakan w-full flex flex-col items-center justify-center
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -70,9 +51,14 @@ export const SystemCardLayout: React.FC = () => {
         </div>
       )}
 
-      {/* TOGGLE CONTROLS (Bahasa & Tema) */}
-      <div className="w-full flex justify-end mb-4 max-w-6xl">
-        {/* Control Island / Pill Container */}
+      {/* HEADER CONTROLS BAR (Jam di Kiri, Kontrol Lang/Mode di Kanan) */}
+      <div className="w-full flex items-center justify-between mb-4 max-w-6xl">
+        {/* Pojok Kiri: Dynamic System Clock sesuai zona waktu user */}
+        <div className="overflow-x-auto">
+          <SystemClockBadge />
+        </div>
+
+        {/* Pojok Kanan: Control Island / Pill Container (Bahasa & Tema) */}
         <div
           className={`p-1 rounded-2xl border flex items-center gap-1 transition-all backdrop-blur-md ${
             isLight
