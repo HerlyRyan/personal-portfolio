@@ -3,6 +3,7 @@ import { useModalEffect } from "../../hooks/useModalEfffect";
 import { useSystem } from "../../context/SystemContext";
 import { ModalHeader } from "../commons/ModalHeader";
 import { ModalContainer } from "../commons/ModalContainer";
+import type { ExperienceType } from "../../locales/data/experienceData";
 
 interface ExperienceModalProps {
   isOpen: boolean;
@@ -14,27 +15,57 @@ export const ExperienceModal: React.FC<ExperienceModalProps> = ({ isOpen }) => {
   const isLight = theme === "light";
 
   const [selectedTech, setSelectedTech] = useState<string | null>(null);
+  const [selectedType, setSelectedType] = useState<ExperienceType | null>(null);
 
   // Ambil data berdasarkan bahasa sistem yang aktif
   const t = systemLang.experienceModal;
 
   const allTechs = Array.from(
     new Set(t.experienceItems.flatMap((item) => item.techStack)),
-  );
+  ).sort((a, b) => a.localeCompare(b));
 
-  const filteredExperience = selectedTech
-    ? t.experienceItems.filter((item) => item.techStack.includes(selectedTech))
-    : t.experienceItems;
+  const availableTypes: ExperienceType[] = [
+    "full-time",
+    "part-time",
+    "internship",
+    "freelance",
+    "bootcamp",
+  ];
+
+  // Filter ganda + .slice().reverse() agar data terakhir yang diinput tampil paling atas
+  const filteredExperience = t.experienceItems
+    .slice()
+    .reverse()
+    .filter((item) => {
+      const matchesTech = selectedTech
+        ? item.techStack.includes(selectedTech)
+        : true;
+      const matchesType = selectedType ? item.type === selectedType : true;
+      return matchesTech && matchesType;
+    });
 
   if (!isOpen) return null;
+
+  // Helper styling untuk warna badge kategori
+  const getTypeBadgeStyle = (type: ExperienceType) => {
+    switch (type) {
+      case "full-time":
+      case "freelance":
+        return "bg-emerald-500/10 text-emerald-500 border-emerald-500/30";
+      case "internship":
+      case "part-time":
+        return "bg-amber-500/10 text-amber-500 border-amber-500/30";
+      case "bootcamp":
+        return "bg-purple-500/10 text-purple-500 border-purple-500/30";
+      default:
+        return "bg-accent-blue/10 text-accent-blue border-accent-blue/30";
+    }
+  };
 
   return (
     <ModalContainer>
       {/* Modal Header */}
-      <ModalHeader
-        title={t.title}
-        onClose={() => closeModal("~/sys/home")}
-      />
+      <ModalHeader title={t.title} onClose={() => closeModal("~/sys/home")} />
 
       {/* Modal Body */}
       <div
@@ -46,8 +77,45 @@ export const ExperienceModal: React.FC<ExperienceModalProps> = ({ isOpen }) => {
             : "#4b5563 transparent",
         }}
       >
-        {/* Fitur HR Helper: Quick Filter Berdasarkan Tech Stack */}
+        {/* Filter Berdasarkan Kategori (Full-time / Internship / Bootcamp) */}
         <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider">
+              {t.filterTypeTag || "// Filter by Category"}
+            </span>
+            {selectedType && (
+              <button
+                onClick={() => setSelectedType(null)}
+                className="text-[10px] font-mono text-accent-blue hover:underline cursor-pointer"
+              >
+                {t.resetTypeFilter || "Reset Kategori ✕"}
+              </button>
+            )}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {availableTypes.map((typeKey) => {
+              const isSelected = selectedType === typeKey;
+              return (
+                <button
+                  key={typeKey}
+                  onClick={() => setSelectedType(isSelected ? null : typeKey)}
+                  className={`text-[11px] font-mono px-3.5 py-1.5 rounded-xl border transition-all cursor-pointer ${
+                    isSelected
+                      ? "bg-accent-blue text-white border-accent-blue shadow-sm"
+                      : isLight
+                        ? "bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-700"
+                        : "bg-dark-border/40 hover:bg-dark-border border-dark-border text-slate-300"
+                  }`}
+                >
+                  {t.typeLabels[typeKey]}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Fitur HR Helper: Quick Filter Berdasarkan Tech Stack */}
+        <div className="space-y-2 pt-2 border-t border-dashed border-slate-500/20">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider">
               {t.filterTag}
@@ -90,95 +158,115 @@ export const ExperienceModal: React.FC<ExperienceModalProps> = ({ isOpen }) => {
 
         {/* Timeline / Experience List */}
         <div className="space-y-5 relative border-l-2 border-accent-blue/30 ml-3 pl-5 sm:pl-6">
-          {filteredExperience.map((item, index) => (
-            <div key={item.id || index} className="relative group">
-              {/* Titik Timeline */}
-              <div className="absolute -left-7.25 sm:-left-8.25 top-1.5 w-3.5 h-3.5 rounded-full border-2 border-accent-blue bg-navy-base transition-all duration-300 group-hover:bg-accent-blue group-hover:scale-125 group-hover:shadow-[0_0_10px_rgba(59,130,246,0.6)]" />
+          {filteredExperience.length === 0 ? (
+            <div className="text-center py-8 font-mono text-xs text-slate-400">
+              $ warning: no experience matches the selected filter.
+            </div>
+          ) : (
+            filteredExperience.map((item, index) => (
+              <div key={item.id || index} className="relative group">
+                {/* Titik Timeline */}
+                <div className="absolute -left-7.25 sm:-left-8.25 top-1.5 w-3.5 h-3.5 rounded-full border-2 border-accent-blue bg-navy-base transition-all duration-300 group-hover:bg-accent-blue group-hover:scale-125 group-hover:shadow-[0_0_10px_rgba(59,130,246,0.6)]" />
 
-              <div
-                className={`border rounded-2xl p-5 sm:p-6 transition-all ${
-                  isLight
-                    ? "bg-slate-50 border-slate-200 hover:border-accent-blue/40 shadow-sm"
-                    : "bg-navy-base/50 border-dark-border hover:border-accent-blue/40"
-                }`}
-              >
-                {/* Header: Role di Kiri, Tahun di Kanan */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-1.5">
-                  <h4
-                    className={`text-base sm:text-lg font-bold transition-colors leading-snug ${isLight ? "text-slate-900" : "text-white"}`}
-                  >
-                    {item.role}
-                  </h4>
-                  <span
-                    className={`text-[10px] font-mono px-3 py-1 rounded-full w-fit border shrink-0 ${
-                      isLight
-                        ? "bg-white border-slate-200 text-slate-600 font-semibold"
-                        : "bg-dark-border border-dark-border/60 text-slate-300 font-semibold"
-                    }`}
-                  >
-                    ⏳ {item.period}
-                  </span>
-                </div>
-
-                {/* Sub-Header: @ Perusahaan & Lokasi */}
-                <div className="flex flex-wrap items-center gap-2 mb-4">
-                  <span className="text-xs sm:text-sm font-semibold text-accent-blue font-mono">
-                    @ {item.company}
-                  </span>
-                  <span className="text-slate-400 text-xs">•</span>
-                  <span
-                    className={`text-xs font-mono flex items-center gap-1 ${isLight ? "text-slate-500" : "text-slate-400"}`}
-                  >
-                    <span>📍</span> {item.location}
-                  </span>
-                </div>
-
-                <p
-                  className={`text-xs sm:text-sm mb-4 leading-relaxed transition-colors ${isLight ? "text-slate-600" : "text-slate-300"}`}
-                >
-                  {item.description}
-                </p>
-
-                {/* Highlights */}
-                <div className="space-y-1.5 mb-4">
-                  <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block mb-1">
-                    // Key Contributions & Impact
-                  </span>
-                  <ul className="space-y-2">
-                    {item.highlights.map((highlight, idx) => (
-                      <li
-                        key={idx}
-                        className={`text-xs sm:text-sm flex items-start gap-2 ${isLight ? "text-slate-700" : "text-slate-300"}`}
-                      >
-                        <span className="text-accent-blue font-bold mt-0.5">
-                          ›
-                        </span>
-                        <span>{highlight}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* Tech Stack */}
                 <div
-                  className={`flex flex-wrap gap-1.5 pt-3 border-t ${isLight ? "border-slate-200" : "border-dark-border/50"}`}
+                  className={`border rounded-2xl p-5 sm:p-6 transition-all ${
+                    isLight
+                      ? "bg-slate-50 border-slate-200 hover:border-accent-blue/40 shadow-sm"
+                      : "bg-navy-base/50 border-dark-border hover:border-accent-blue/40"
+                  }`}
                 >
-                  {item.techStack.map((tech, idx) => (
+                  {/* Header: Role & Badge Tipe di Kiri, Periode di Kanan */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
+                    {/* Bagian Kiri: Role + Badge Tipe di sebelah kanan role */}
+                    <div className="flex flex-wrap items-center gap-2.5">
+                      <h4
+                        className={`text-base sm:text-lg font-bold transition-colors leading-snug ${isLight ? "text-slate-900" : "text-white"}`}
+                      >
+                        {item.role}
+                      </h4>
+
+                      {/* Badge Kategori Tipe (Full-time / Internship / Bootcamp) */}
+                      {item.type && t.typeLabels[item.type] && (
+                        <span
+                          className={`text-[10px] font-mono px-2.5 py-0.5 rounded-md border font-semibold ${getTypeBadgeStyle(item.type)}`}
+                        >
+                          {t.typeLabels[item.type]}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Bagian Kanan: Periode Waktu */}
                     <span
-                      key={idx}
-                      className={`text-[11px] font-mono px-2.5 py-1 rounded-lg border transition-colors ${
+                      className={`text-[10px] font-mono px-3 py-1 rounded-full w-fit border shrink-0 ${
                         isLight
-                          ? "bg-white border-slate-200 text-slate-600 shadow-2xs"
-                          : "bg-dark-border/50 border-dark-border/50 text-slate-400"
+                          ? "bg-white border-slate-200 text-slate-600 font-semibold"
+                          : "bg-dark-border border-dark-border/60 text-slate-300 font-semibold"
                       }`}
                     >
-                      {tech}
+                      ⏳ {item.period}
                     </span>
-                  ))}
+                  </div>
+
+                  {/* Sub-Header: @ Perusahaan & Lokasi */}
+                  <div className="flex flex-wrap items-center gap-2 mb-4">
+                    <span className="text-xs sm:text-sm font-semibold text-accent-blue font-mono">
+                      @ {item.company}
+                    </span>
+                    <span className="text-slate-400 text-xs">•</span>
+                    <span
+                      className={`text-xs font-mono flex items-center gap-1 ${isLight ? "text-slate-500" : "text-slate-400"}`}
+                    >
+                      <span>📍</span> {item.location}
+                    </span>
+                  </div>
+
+                  <p
+                    className={`text-xs sm:text-sm mb-4 leading-relaxed transition-colors ${isLight ? "text-slate-600" : "text-slate-300"}`}
+                  >
+                    {item.description}
+                  </p>
+
+                  {/* Highlights */}
+                  <div className="space-y-1.5 mb-4">
+                    <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block mb-1">
+                      // Key Contributions & Impact
+                    </span>
+                    <ul className="space-y-2">
+                      {item.highlights.map((highlight, idx) => (
+                        <li
+                          key={idx}
+                          className={`text-xs sm:text-sm flex items-start gap-2 ${isLight ? "text-slate-700" : "text-slate-300"}`}
+                        >
+                          <span className="text-accent-blue font-bold mt-0.5">
+                            ›
+                          </span>
+                          <span>{highlight}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Tech Stack */}
+                  <div
+                    className={`flex flex-wrap gap-1.5 pt-3 border-t ${isLight ? "border-slate-200" : "border-dark-border/50"}`}
+                  >
+                    {item.techStack.map((tech, idx) => (
+                      <span
+                        key={idx}
+                        className={`text-[11px] font-mono px-2.5 py-1 rounded-lg border transition-colors ${
+                          isLight
+                            ? "bg-white border-slate-200 text-slate-600 shadow-2xs"
+                            : "bg-dark-border/50 border-dark-border/50 text-slate-400"
+                        }`}
+                      >
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
     </ModalContainer>
