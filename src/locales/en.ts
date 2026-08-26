@@ -1,5 +1,5 @@
 import { aboutEn } from './data/aboutData';
-import { experienceId } from './data/experienceData';
+import { experienceEn } from './data/experienceData';
 import { projectsEn } from './data/projectsData';
 import { skills } from './data/skillsData';
 
@@ -16,7 +16,7 @@ export const en = {
     secureConnection: '[Secure Connection]',
   },
   projectsModal: projectsEn,
-  experienceModal: experienceId,
+  experienceModal: experienceEn,
   skillsModal: skills,
   aboutModal: aboutEn,
 };
