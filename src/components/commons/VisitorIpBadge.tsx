@@ -33,7 +33,7 @@ export const VisitorIpBadge: React.FC = () => {
         setIsLoading(false);
       })
       .catch(() => {
-        setIpAddress("127.0.0.1 (Local)");
+        setIpAddress("(Local)");
         setPing(12);
         setIsLoading(false);
       });
