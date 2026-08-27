@@ -23,38 +23,39 @@ export const skills: SkillsLocale = {
     {
       categoryName: "Frontend Development",
       skills: [
-        { name: "React", level: "Intermediate" },
-        { name: "TypeScript", level: "Advanced" },
-        { name: "JavaScript", level: "Advanced" },
-        { name: "Tailwind CSS", level: "Advanced" },
-        { name: "HTML5", level: "Advanced" },
-        { name: "CSS3", level: "Advanced" },
-        { name: "Vite", level: "Intermediate" },
+        { name: "HTML5", level: "Intermediate" },
+        { name: "CSS3", level: "Intermediate" },
+        { name: "Bootstrap", level: "Intermediate" },
+        { name: "Tailwind CSS", level: "Beginner" },
+        { name: "JavaScript", level: "Intermediate" },
+        { name: "TypeScript", level: "Intermediate" },
+        { name: "React", level: "Beginner" },
       ]
     },
     {
-      categoryName: "Backend & Frameworks",
+      categoryName: "Backend Development",
       skills: [
         { name: "Node.js", level: "Intermediate" },
-        { name: "PHP", level: "Advanced" },
-        { name: "Laravel", level: "Advanced" },
-        { name: "RESTful APIs", level: "Advanced" },
+        { name: "PHP", level: "Intermediate" },
+        { name: "Laravel", level: "Intermediate" },
+        { name: "RESTful API", level: "Intermediate" },
       ]
     },
     {
       categoryName: "Mobile Development",
       skills: [
-        { name: "Flutter", level: "Advanced" },
-        { name: "Dart", level: "Advanced" },
+        { name: "Flutter", level: "Beginner" },
+        { name: "Dart", level: "Beginner" },
       ]
     },
     {
       categoryName: "Database & Tools",
       skills: [
-        { name: "MySQL", level: "Advanced" },
-        { name: "Git", level: "Advanced" },
-        { name: "GitHub", level: "Advanced" },
-        { name: "VS Code", level: "Advanced" },
+        { name: "MySQL", level: "Intermediate" },
+        { name: "PostgreSQL", level: "Intermediate" },
+        { name: "Git", level: "Intermediate" },
+        { name: "GitHub", level: "Intermediate" },
+        { name: "VS Code", level: "Intermediate" },
         { name: "Postman", level: "Intermediate" },
       ]
     }

@@ -1,35 +1,116 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --color-dark-bg: #050505;
-  --color-dark-card: #0a0d14;
-  --color-dark-border: #1e2530;
+  /* =========================
+     COLOR SYSTEM
+  ========================== */
 
-  --color-navy-base: #0b0f19;
-  --color-navy-deep: #070a10;
+  /* Dark Theme */
+  --color-dark-bg: #0f141c;
+  --color-dark-card: #151b26;
+  --color-dark-border: #263042;
 
+  --color-navy-base: #131a26;
+  --color-navy-deep: #0b1018;
+
+  /* Accent */
   --color-accent-blue: #3b82f6;
   --color-accent-subtle: #1d4ed8;
 
-  /* Ubah font sans default menjadi JetBrains Mono agar seluruh halaman menggunakan font ini */
-  --font-sans: 'JetBrains Mono', monospace;
+  /* Typography colors */
+  --color-text-primary: #f1f5f9;
+  --color-text-body: #cbd5e1;
+  --color-text-secondary: #94a3b8;
+  --color-text-muted: #64748b;
+
+  /* =========================
+     TYPOGRAPHY
+  ========================== */
+
+  /*
+    Inter:
+    Untuk paragraph, deskripsi, dan text panjang agar lebih mudah dibaca.
+
+    JetBrains Mono:
+    Untuk heading tertentu, label system, metadata,
+    badge, navigation code, dan elemen terminal.
+  */
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 }
 
+
+/* =========================================================
+   BASE
+========================================================= */
+
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     background-color: var(--color-dark-bg);
-    color: #f8fafc;
+    color: var(--color-text-body);
+
     font-family: var(--font-sans);
+    font-weight: 400;
+
+    line-height: 1.6;
+
     overflow-x: hidden;
+
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /*
+    Heading tetap bisa menggunakan karakter teknis
+    JetBrains Mono agar branding developer/system tetap terasa.
+  */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: var(--color-text-primary);
+    font-family: var(--font-mono);
+    font-weight: 600;
+  }
+
+  p {
+    color: var(--color-text-body);
+  }
+
+  /*
+    Global keyboard focus fallback.
+
+    Penting untuk pengguna keyboard dan pengguna
+    dengan keterbatasan motorik.
+  */
+  :focus-visible {
+    outline: 2px solid var(--color-accent-blue);
+    outline-offset: 3px;
+  }
+
+  /*
+    Text selection dibuat tetap jelas
+    baik di dark maupun light background.
+  */
+  ::selection {
+    background-color: var(--color-accent-blue);
+    color: #ffffff;
   }
 }
 
-/* Light mode overrides — back to targeting your own custom classes only.
-   Consolidated into fewer rules (grouped selectors) so there's less
-   for the browser to match per toggle, but otherwise unchanged from
-   what was already working for you. */
+
+/* =========================================================
+   LIGHT THEME
+========================================================= */
+
 .light-theme {
   background-color: #f1f5f9 !important;
   color: #0f172a !important;
@@ -61,7 +142,14 @@
   color: #0f172a !important;
 }
 
-.light-theme .text-slate-100,
+/*
+  Slate-100 dibedakan dari slate-300/400
+  agar hierarchy text tetap terlihat.
+*/
+.light-theme .text-slate-100 {
+  color: #1e293b !important;
+}
+
 .light-theme .text-slate-300,
 .light-theme .text-slate-400 {
   color: #475569 !important;
@@ -75,7 +163,87 @@
   background-color: #e2e8f0 !important;
 }
 
-/* Scrollbar */
+
+/* =========================================================
+   TYPOGRAPHY UTILITIES
+========================================================= */
+
+/*
+  Gunakan class ini untuk elemen UI teknis seperti:
+
+  // SYSTEM OVERVIEW
+  01 // MODULE
+  SYS_NET
+  badge teknologi
+  metadata terminal
+*/
+.font-system {
+  font-family: var(--font-mono);
+}
+
+/*
+  Gunakan untuk paragraf/deskripsi
+  yang membutuhkan readability lebih baik.
+*/
+.font-readable {
+  font-family: var(--font-sans);
+}
+
+/*
+  Secondary information tidak dibuat terlalu redup.
+*/
+.text-secondary-readable {
+  color: var(--color-text-secondary);
+}
+
+/*
+  Muted text hanya direkomendasikan untuk
+  informasi dekoratif/non-esensial.
+*/
+.text-muted-readable {
+  color: var(--color-text-muted);
+}
+
+
+/* =========================================================
+   INTERACTIVE ELEMENTS
+========================================================= */
+
+button,
+a,
+input,
+select,
+textarea {
+  transition-property:
+    color,
+    background-color,
+    border-color,
+    opacity,
+    box-shadow;
+
+  transition-duration: 150ms;
+  transition-timing-function: ease;
+}
+
+/*
+  Jangan menghapus focus indicator secara global.
+  Jika component menggunakan outline-none,
+  pastikan selalu memiliki focus-visible:ring-*.
+*/
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--color-accent-blue);
+  outline-offset: 3px;
+}
+
+
+/* =========================================================
+   SCROLLBAR
+========================================================= */
+
 .custom-scrollbar::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -87,15 +255,9 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(75, 85, 99, 0.4);
+  background: rgba(100, 116, 139, 0.55);
   border-radius: 9999px;
-  border: 2px solid transparent;
-  background-clip: content-box;
-}
 
-.light .custom-scrollbar::-webkit-scrollbar-thumb,
-.is-light .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(203, 213, 225, 0.8);
   border: 2px solid transparent;
   background-clip: content-box;
 }
@@ -105,33 +267,109 @@
   background-clip: content-box;
 }
 
+/*
+  Tetap mendukung class lama jika digunakan
+  pada component light mode.
+*/
+.light .custom-scrollbar::-webkit-scrollbar-thumb,
+.is-light .custom-scrollbar::-webkit-scrollbar-thumb,
+.light-theme .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.8);
+
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+.light .custom-scrollbar::-webkit-scrollbar-thumb:hover,
+.is-light .custom-scrollbar::-webkit-scrollbar-thumb:hover,
+.light-theme .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 130, 246, 0.75);
+  background-clip: content-box;
+}
+
+
+/* =========================================================
+   ANIMATION
+========================================================= */
+
 @keyframes spideyGlow {
-  0%, 100% { transform: translate(0px, 0px) scale(1); opacity: 0.8; }
-  50% { transform: translate(-25px, 20px) scale(1.15); opacity: 1; }
+  0%,
+  100% {
+    transform: translate(0px, 0px) scale(1);
+    opacity: 0.8;
+  }
+
+  50% {
+    transform: translate(-25px, 20px) scale(1.15);
+    opacity: 1;
+  }
 }
 
 .animate-spideyGlow {
   animation: spideyGlow 14s infinite ease-in-out;
 }
 
+
 @keyframes orbitBlue {
-  0% { transform: rotate(0deg) translate(220px) rotate(0deg); }
-  100% { transform: rotate(360deg) translate(220px) rotate(-360deg); }
+  0% {
+    transform:
+      rotate(0deg)
+      translate(220px)
+      rotate(0deg);
+  }
+
+  100% {
+    transform:
+      rotate(360deg)
+      translate(220px)
+      rotate(-360deg);
+  }
 }
+
+.animate-orbitBlue {
+  animation: orbitBlue 25s linear infinite;
+}
+
 
 @keyframes orbitRed {
-  0% { transform: rotate(360deg) translate(-180px) rotate(-360deg); }
-  100% { transform: rotate(0deg) translate(-180px) rotate(0deg); }
+  0% {
+    transform:
+      rotate(360deg)
+      translate(-180px)
+      rotate(-360deg);
+  }
+
+  100% {
+    transform:
+      rotate(0deg)
+      translate(-180px)
+      rotate(0deg);
+  }
 }
 
-.animate-orbitBlue { animation: orbitBlue 25s linear infinite; }
-.animate-orbitRed { animation: orbitRed 30s linear infinite; }
+.animate-orbitRed {
+  animation: orbitRed 30s linear infinite;
+}
 
-.animate-orbitBlue, .animate-orbitRed, .animate-spideyGlow {
+
+.animate-orbitBlue,
+.animate-orbitRed,
+.animate-spideyGlow {
   will-change: transform;
 }
 
-@media (max-width: 768px), (prefers-reduced-motion: reduce) {
+
+/* =========================================================
+   MOBILE OPTIMIZATION
+========================================================= */
+
+/*
+  Backdrop blur cukup mahal untuk perangkat mobile
+  dan terkadang mengurangi readability.
+
+  Karena itu kita nonaktifkan khusus mobile.
+*/
+@media (max-width: 768px) {
   .backdrop-blur-xl,
   .backdrop-blur-sm,
   .backdrop-blur-xs {
@@ -140,18 +378,80 @@
   }
 }
 
- button, a, input, select, ::before, ::after {
-  transition-property: color, background-color, border-color;
-  transition-duration: 150ms;
-  transition-timing-function: ease;
+
+/* =========================================================
+   ACCESSIBILITY: REDUCED MOTION
+========================================================= */
+
+/*
+  Pengguna yang mengaktifkan "Reduce Motion"
+  tidak seharusnya melihat decorative orbital animation.
+*/
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+  }
+
+  .animate-orbitBlue,
+  .animate-orbitRed,
+  .animate-spideyGlow {
+    animation: none !important;
+    transform: none !important;
+  }
+
+  .backdrop-blur-xl,
+  .backdrop-blur-sm,
+  .backdrop-blur-xs {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
 }
 
-/* Kill transitions entirely during the theme-switch frame itself.
-   This is what actually stops the stutter — see JS note below. */
-.theme-switching, .theme-switching * {
+
+/* =========================================================
+   THEME SWITCHING
+========================================================= */
+
+/*
+  Menghindari seluruh UI beranimasi ketika
+  berpindah Dark <-> Light.
+*/
+.theme-switching,
+.theme-switching * {
   transition: none !important;
 }
 
-html, body {
+
+/* =========================================================
+   DOCUMENT / OVERFLOW
+========================================================= */
+
+html,
+body {
   overscroll-behavior-x: none;
+}
+
+/* =========================================================
+   DESKTOP PORTFOLIO VIEWPORT
+========================================================= */
+
+/*
+  Portfolio menggunakan konsep single-screen system dashboard
+  pada desktop yang mempunyai ruang vertikal mencukupi.
+
+  Pada layar pendek / zoom tinggi, halaman kembali dapat
+  di-scroll agar content tidak terpotong.
+*/
+@media (min-width: 1024px) and (min-height: 720px) {
+  .portfolio-desktop-viewport {
+    height: 100dvh;
+    min-height: 100dvh;
+    overflow: hidden;
+  }
 }

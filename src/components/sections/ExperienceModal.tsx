@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useModalEffect } from "../../hooks/useModalEfffect";
+import React, { useId, useMemo, useState } from "react";
+
 import { useSystem } from "../../context/SystemContext";
 import { ModalHeader } from "../commons/ModalHeader";
 import { ModalContainer } from "../commons/ModalContainer";
@@ -9,265 +9,903 @@ interface ExperienceModalProps {
   isOpen: boolean;
 }
 
+const AVAILABLE_TYPES: ExperienceType[] = [
+  "full-time",
+  "part-time",
+  "internship",
+  "freelance",
+  "bootcamp",
+];
+
 export const ExperienceModal: React.FC<ExperienceModalProps> = ({ isOpen }) => {
   const { theme, closeModal, systemLang } = useSystem();
-  useModalEffect(isOpen, () => closeModal("~/sys/home"));
+
   const isLight = theme === "light";
-
-  const [selectedTech, setSelectedTech] = useState<string | null>(null);
-  const [selectedType, setSelectedType] = useState<ExperienceType | null>(null);
-
-  // Ambil data berdasarkan bahasa sistem yang aktif
   const t = systemLang.experienceModal;
 
-  const allTechs = Array.from(
-    new Set(t.experienceItems.flatMap((item) => item.techStack)),
-  ).sort((a, b) => a.localeCompare(b));
+  const titleId = useId();
 
-  const availableTypes: ExperienceType[] = [
-    "full-time",
-    "part-time",
-    "internship",
-    "freelance",
-    "bootcamp",
-  ];
+  const [selectedTech, setSelectedTech] = useState<string | null>(null);
 
-  // Filter ganda + .slice().reverse() agar data terakhir yang diinput tampil paling atas
-  const filteredExperience = t.experienceItems
-    .slice()
-    .reverse()
-    .filter((item) => {
-      const matchesTech = selectedTech
-        ? item.techStack.includes(selectedTech)
-        : true;
-      const matchesType = selectedType ? item.type === selectedType : true;
-      return matchesTech && matchesType;
-    });
+  const [selectedType, setSelectedType] = useState<ExperienceType | null>(null);
 
-  if (!isOpen) return null;
+  /*
+   * =====================================================
+   * DATA DERIVATION
+   * =====================================================
+   */
 
-  // Helper styling untuk warna badge kategori
+  const allTechs = useMemo(() => {
+    return Array.from(
+      new Set(t.experienceItems.flatMap((item) => item.techStack)),
+    ).sort((a, b) => a.localeCompare(b));
+  }, [t.experienceItems]);
+
+  const filteredExperience = useMemo(() => {
+    return t.experienceItems
+      .slice()
+      .reverse()
+      .filter((item) => {
+        const matchesTech = selectedTech
+          ? item.techStack.includes(selectedTech)
+          : true;
+
+        const matchesType = selectedType ? item.type === selectedType : true;
+
+        return matchesTech && matchesType;
+      });
+  }, [selectedTech, selectedType, t.experienceItems]);
+
+  /*
+   * =====================================================
+   * MODAL
+   * =====================================================
+   */
+
+  if (!isOpen) {
+    return null;
+  }
+
+  const handleClose = () => {
+    closeModal("~/sys/home");
+  };
+
+  /*
+   * =====================================================
+   * BADGE STYLE
+   * =====================================================
+   */
+
   const getTypeBadgeStyle = (type: ExperienceType) => {
     switch (type) {
       case "full-time":
       case "freelance":
-        return "bg-emerald-500/10 text-emerald-500 border-emerald-500/30";
+        return isLight
+          ? `
+            border-emerald-600/30
+            bg-emerald-50
+            text-emerald-700
+          `
+          : `
+            border-emerald-500/30
+            bg-emerald-500/10
+            text-emerald-400
+          `;
+
       case "internship":
       case "part-time":
-        return "bg-amber-500/10 text-amber-500 border-amber-500/30";
+        return isLight
+          ? `
+            border-amber-600/30
+            bg-amber-50
+            text-amber-700
+          `
+          : `
+            border-amber-500/30
+            bg-amber-500/10
+            text-amber-400
+          `;
+
       case "bootcamp":
-        return "bg-purple-500/10 text-purple-500 border-purple-500/30";
+        return isLight
+          ? `
+            border-purple-600/30
+            bg-purple-50
+            text-purple-700
+          `
+          : `
+            border-purple-500/30
+            bg-purple-500/10
+            text-purple-400
+          `;
+
       default:
-        return "bg-accent-blue/10 text-accent-blue border-accent-blue/30";
+        return `
+          border-accent-blue/30
+          bg-accent-blue/10
+          text-accent-blue
+        `;
     }
   };
 
-  return (
-    <ModalContainer>
-      {/* Modal Header */}
-      <ModalHeader title={t.title} onClose={() => closeModal("~/sys/home")} />
+  const activeFilterCount =
+    Number(Boolean(selectedType)) + Number(Boolean(selectedTech));
 
-      {/* Modal Body */}
-      <div
-        className="p-6 overflow-y-auto space-y-6 flex-1 custom-scrollbar"
-        style={{
-          scrollbarWidth: "thin",
-          scrollbarColor: isLight
-            ? "#cbd5e1 transparent"
-            : "#4b5563 transparent",
-        }}
-      >
-        {/* Filter Berdasarkan Kategori (Full-time / Internship / Bootcamp) */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider">
-              {t.filterTypeTag || "// Filter by Category"}
+  return (
+    <ModalContainer onClose={handleClose} titleId={titleId}>
+      {/* =================================================
+          MODAL HEADER
+      ================================================== */}
+
+      <ModalHeader
+        title={t.title}
+        titleId={titleId}
+        onClose={handleClose}
+        extraContent={
+          activeFilterCount > 0 ? (
+            <span
+              className="
+                hidden
+                rounded-full
+                bg-accent-blue/10
+                px-2
+                py-0.5
+                font-mono
+                text-xs
+                font-medium
+                text-accent-blue
+
+                sm:inline
+              "
+            >
+              {activeFilterCount} active
             </span>
+          ) : null
+        }
+      />
+
+      {/* =================================================
+          FILTER RESULT ANNOUNCEMENT
+      ================================================== */}
+
+      <p className="sr-only" aria-live="polite" aria-atomic="true">
+        Showing {filteredExperience.length} experience
+        {filteredExperience.length === 1 ? "" : "s"}.
+      </p>
+
+      {/* =================================================
+          MODAL BODY
+      ================================================== */}
+
+      <div
+        className="
+          custom-scrollbar
+          min-h-0
+          flex-1
+          space-y-6
+          overflow-y-auto
+          p-4
+
+          sm:p-6
+        "
+      >
+        {/* =================================================
+            TYPE FILTER
+        ================================================== */}
+
+        <section aria-labelledby="experience-type-filter" className="space-y-3">
+          <div
+            className="
+              flex
+              items-center
+              justify-between
+              gap-3
+            "
+          >
+            <h3
+              id="experience-type-filter"
+              className={`
+                font-mono
+                text-xs
+                font-semibold
+                uppercase
+                tracking-wider
+
+                ${isLight ? "text-slate-600" : "text-slate-400"}
+              `}
+            >
+              {t.filterTypeTag || "// Filter by Category"}
+            </h3>
+
             {selectedType && (
               <button
+                type="button"
                 onClick={() => setSelectedType(null)}
-                className="text-[10px] font-mono text-accent-blue hover:underline cursor-pointer"
+                className="
+                  min-h-8
+                  rounded-lg
+                  px-2
+                  font-mono
+                  text-xs
+                  font-medium
+                  text-accent-blue
+                  transition-colors
+
+                  hover:bg-accent-blue/10
+
+                  focus-visible:outline-none
+                  focus-visible:ring-2
+                  focus-visible:ring-accent-blue
+                "
               >
-                {t.resetTypeFilter || "Reset Kategori ✕"}
+                {t.resetTypeFilter || "Reset Category"}
               </button>
             )}
           </div>
-          <div className="flex flex-wrap gap-2">
-            {availableTypes.map((typeKey) => {
+
+          <div
+            role="group"
+            aria-label="Filter experiences by employment type"
+            className="
+              flex
+              flex-wrap
+              gap-2
+            "
+          >
+            {AVAILABLE_TYPES.map((typeKey) => {
               const isSelected = selectedType === typeKey;
+
               return (
                 <button
                   key={typeKey}
+                  type="button"
                   onClick={() => setSelectedType(isSelected ? null : typeKey)}
-                  className={`text-[11px] font-mono px-3.5 py-1.5 rounded-xl border transition-all cursor-pointer ${
-                    isSelected
-                      ? "bg-accent-blue text-white border-accent-blue shadow-sm"
-                      : isLight
-                        ? "bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-700"
-                        : "bg-dark-border/40 hover:bg-dark-border border-dark-border text-slate-300"
-                  }`}
+                  aria-pressed={isSelected}
+                  className={`
+                      min-h-10
+                      rounded-xl
+                      border
+                      px-3.5
+                      py-2
+                      font-mono
+                      text-xs
+                      font-medium
+                      transition-colors
+
+                      focus-visible:outline-none
+                      focus-visible:ring-2
+                      focus-visible:ring-accent-blue
+
+                      ${
+                        isSelected
+                          ? `
+                            border-accent-blue
+                            bg-accent-blue
+                            text-white
+                          `
+                          : isLight
+                            ? `
+                              border-slate-200
+                              bg-slate-100
+                              text-slate-700
+
+                              hover:bg-slate-200
+                            `
+                            : `
+                              border-dark-border
+                              bg-dark-border/40
+                              text-slate-300
+
+                              hover:bg-dark-border
+                              hover:text-white
+                            `
+                      }
+                    `}
                 >
                   {t.typeLabels[typeKey]}
                 </button>
               );
             })}
           </div>
-        </div>
+        </section>
 
-        {/* Fitur HR Helper: Quick Filter Berdasarkan Tech Stack */}
-        <div className="space-y-2 pt-2 border-t border-dashed border-slate-500/20">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider">
+        {/* =================================================
+            TECH FILTER
+        ================================================== */}
+
+        <section
+          aria-labelledby="experience-tech-filter"
+          className={`
+            space-y-3
+            border-t
+            border-dashed
+            pt-5
+
+            ${isLight ? "border-slate-300" : "border-dark-border"}
+          `}
+        >
+          <div
+            className="
+              flex
+              items-center
+              justify-between
+              gap-3
+            "
+          >
+            <h3
+              id="experience-tech-filter"
+              className={`
+                font-mono
+                text-xs
+                font-semibold
+                uppercase
+                tracking-wider
+
+                ${isLight ? "text-slate-600" : "text-slate-400"}
+              `}
+            >
               {t.filterTag}
-            </span>
+            </h3>
+
             {selectedTech && (
               <button
+                type="button"
                 onClick={() => setSelectedTech(null)}
-                className="text-[10px] font-mono text-accent-blue hover:underline cursor-pointer"
+                className="
+                  min-h-8
+                  rounded-lg
+                  px-2
+                  font-mono
+                  text-xs
+                  font-medium
+                  text-accent-blue
+                  transition-colors
+
+                  hover:bg-accent-blue/10
+
+                  focus-visible:outline-none
+                  focus-visible:ring-2
+                  focus-visible:ring-accent-blue
+                "
               >
                 {t.resetFilter}
               </button>
             )}
           </div>
-          <div className="flex flex-wrap gap-1.5">
-            {allTechs.map((tech, idx) => {
+
+          <div
+            role="group"
+            aria-label="Filter experiences by technology"
+            className="
+              flex
+              flex-wrap
+              gap-2
+            "
+          >
+            {allTechs.map((tech) => {
               const isSelected = selectedTech === tech;
+
               return (
                 <button
-                  key={idx}
+                  key={tech}
+                  type="button"
                   onClick={() => setSelectedTech(isSelected ? null : tech)}
-                  className={`text-[11px] font-mono px-3 py-1 rounded-xl border transition-all cursor-pointer ${
-                    isSelected
-                      ? "bg-accent-blue text-white border-accent-blue shadow-sm"
-                      : isLight
-                        ? "bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-700"
-                        : "bg-dark-border/40 hover:bg-dark-border border-dark-border text-slate-300"
-                  }`}
+                  aria-pressed={isSelected}
+                  className={`
+                    min-h-9
+                    rounded-xl
+                    border
+                    px-3
+                    py-1.5
+                    font-mono
+                    text-xs
+                    font-medium
+                    transition-colors
+
+                    focus-visible:outline-none
+                    focus-visible:ring-2
+                    focus-visible:ring-accent-blue
+
+                    ${
+                      isSelected
+                        ? `
+                          border-accent-blue
+                          bg-accent-blue
+                          text-white
+                        `
+                        : isLight
+                          ? `
+                            border-slate-200
+                            bg-slate-100
+                            text-slate-700
+
+                            hover:bg-slate-200
+                          `
+                          : `
+                            border-dark-border
+                            bg-dark-border/40
+                            text-slate-300
+
+                            hover:bg-dark-border
+                            hover:text-white
+                          `
+                    }
+                  `}
                 >
                   {tech}
                 </button>
               );
             })}
           </div>
-        </div>
+        </section>
 
-        {/* Garis Pembatas Tipis */}
+        {/* =================================================
+            EXPERIENCE SUMMARY
+        ================================================== */}
+
         <div
-          className={`h-px w-full ${isLight ? "bg-slate-200" : "bg-dark-border"}`}
-        />
+          className={`
+            flex
+            items-center
+            justify-between
+            gap-3
+            border-t
+            pt-4
 
-        {/* Timeline / Experience List */}
-        <div className="space-y-5 relative border-l-2 border-accent-blue/30 ml-3 pl-5 sm:pl-6">
-          {filteredExperience.length === 0 ? (
-            <div className="text-center py-8 font-mono text-xs text-slate-400">
-              $ warning: no experience matches the selected filter.
-            </div>
-          ) : (
-            filteredExperience.map((item, index) => (
-              <div key={item.id || index} className="relative group">
-                {/* Titik Timeline */}
-                <div className="absolute -left-7.25 sm:-left-8.25 top-1.5 w-3.5 h-3.5 rounded-full border-2 border-accent-blue bg-navy-base transition-all duration-300 group-hover:bg-accent-blue group-hover:scale-125 group-hover:shadow-[0_0_10px_rgba(59,130,246,0.6)]" />
+            ${isLight ? "border-slate-200" : "border-dark-border"}
+          `}
+        >
+          <span
+            className={`
+              text-sm
+              font-medium
 
-                <div
-                  className={`border rounded-2xl p-5 sm:p-6 transition-all ${
-                    isLight
-                      ? "bg-slate-50 border-slate-200 hover:border-accent-blue/40 shadow-sm"
-                      : "bg-navy-base/50 border-dark-border hover:border-accent-blue/40"
-                  }`}
-                >
-                  {/* Header: Role & Badge Tipe di Kiri, Periode di Kanan */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
-                    {/* Bagian Kiri: Role + Badge Tipe di sebelah kanan role */}
-                    <div className="flex flex-wrap items-center gap-2.5">
-                      <h4
-                        className={`text-base sm:text-lg font-bold transition-colors leading-snug ${isLight ? "text-slate-900" : "text-white"}`}
-                      >
-                        {item.role}
-                      </h4>
+              ${isLight ? "text-slate-700" : "text-slate-300"}
+            `}
+          >
+            {filteredExperience.length} experience
+            {filteredExperience.length === 1 ? "" : "s"}
+          </span>
 
-                      {/* Badge Kategori Tipe (Full-time / Internship / Bootcamp) */}
-                      {item.type && t.typeLabels[item.type] && (
-                        <span
-                          className={`text-[10px] font-mono px-2.5 py-0.5 rounded-md border font-semibold ${getTypeBadgeStyle(item.type)}`}
-                        >
-                          {t.typeLabels[item.type]}
-                        </span>
-                      )}
-                    </div>
+          {(selectedType || selectedTech) && (
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedType(null);
+                setSelectedTech(null);
+              }}
+              className="
+                min-h-9
+                rounded-lg
+                px-2
+                font-mono
+                text-xs
+                font-medium
+                text-accent-blue
+                transition-colors
 
-                    {/* Bagian Kanan: Periode Waktu */}
-                    <span
-                      className={`text-[10px] font-mono px-3 py-1 rounded-full w-fit border shrink-0 ${
-                        isLight
-                          ? "bg-white border-slate-200 text-slate-600 font-semibold"
-                          : "bg-dark-border border-dark-border/60 text-slate-300 font-semibold"
-                      }`}
-                    >
-                      ⏳ {item.period}
-                    </span>
-                  </div>
+                hover:bg-accent-blue/10
 
-                  {/* Sub-Header: @ Perusahaan & Lokasi */}
-                  <div className="flex flex-wrap items-center gap-2 mb-4">
-                    <span className="text-xs sm:text-sm font-semibold text-accent-blue font-mono">
-                      @ {item.company}
-                    </span>
-                    <span className="text-slate-400 text-xs">•</span>
-                    <span
-                      className={`text-xs font-mono flex items-center gap-1 ${isLight ? "text-slate-500" : "text-slate-400"}`}
-                    >
-                      <span>📍</span> {item.location}
-                    </span>
-                  </div>
-
-                  <p
-                    className={`text-xs sm:text-sm mb-4 leading-relaxed transition-colors ${isLight ? "text-slate-600" : "text-slate-300"}`}
-                  >
-                    {item.description}
-                  </p>
-
-                  {/* Highlights */}
-                  <div className="space-y-1.5 mb-4">
-                    <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block mb-1">
-                      // Key Contributions & Impact
-                    </span>
-                    <ul className="space-y-2">
-                      {item.highlights.map((highlight, idx) => (
-                        <li
-                          key={idx}
-                          className={`text-xs sm:text-sm flex items-start gap-2 ${isLight ? "text-slate-700" : "text-slate-300"}`}
-                        >
-                          <span className="text-accent-blue font-bold mt-0.5">
-                            ›
-                          </span>
-                          <span>{highlight}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {/* Tech Stack */}
-                  <div
-                    className={`flex flex-wrap gap-1.5 pt-3 border-t ${isLight ? "border-slate-200" : "border-dark-border/50"}`}
-                  >
-                    {item.techStack.map((tech, idx) => (
-                      <span
-                        key={idx}
-                        className={`text-[11px] font-mono px-2.5 py-1 rounded-lg border transition-colors ${
-                          isLight
-                            ? "bg-white border-slate-200 text-slate-600 shadow-2xs"
-                            : "bg-dark-border/50 border-dark-border/50 text-slate-400"
-                        }`}
-                      >
-                        {tech}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ))
+                focus-visible:outline-none
+                focus-visible:ring-2
+                focus-visible:ring-accent-blue
+              "
+            >
+              Clear all
+            </button>
           )}
         </div>
+
+        {/* =================================================
+            EXPERIENCE TIMELINE
+        ================================================== */}
+
+        <section aria-label="Professional experience timeline">
+          {filteredExperience.length === 0 ? (
+            <div
+              role="status"
+              className={`
+                rounded-2xl
+                border
+                px-4
+                py-8
+                text-center
+
+                ${
+                  isLight
+                    ? `
+                      border-slate-200
+                      bg-slate-50
+                    `
+                    : `
+                      border-dark-border
+                      bg-navy-base/40
+                    `
+                }
+              `}
+            >
+              <p
+                className="
+                  font-mono
+                  text-xs
+                  font-medium
+                  text-accent-blue
+                "
+              >
+                $ warning:
+              </p>
+
+              <p
+                className={`
+                  mt-2
+                  text-sm
+
+                  ${isLight ? "text-slate-600" : "text-slate-300"}
+                `}
+              >
+                No experience matches the selected filters.
+              </p>
+            </div>
+          ) : (
+            <ol
+              className="
+                relative
+                ml-3
+                space-y-5
+                border-l-2
+                border-accent-blue/30
+                pl-5
+
+                sm:pl-6
+              "
+            >
+              {filteredExperience.map((item) => (
+                <li
+                  key={item.id}
+                  className="
+                      group
+                      relative
+                    "
+                >
+                  {/* Timeline marker */}
+                  <span
+                    aria-hidden="true"
+                    className="
+                        absolute
+                        -left-7
+                        top-6
+
+                        h-3.5
+                        w-3.5
+
+                        rounded-full
+                        border-2
+                        border-accent-blue
+                        bg-navy-base
+                        transition-colors
+
+                        group-hover:scale-110
+                        group-hover:bg-accent-blue
+
+                        sm:-left-8
+                      "
+                  />
+
+                  <article
+                    className={`
+                        rounded-2xl
+                        border
+                        p-5
+                        transition-colors
+
+                        sm:p-6
+
+                        ${
+                          isLight
+                            ? `
+                              border-slate-200
+                              bg-slate-50
+
+                              hover:border-accent-blue/40
+                            `
+                            : `
+                              border-dark-border
+                              bg-navy-base/50
+
+                              hover:border-accent-blue/40
+                            `
+                        }
+                      `}
+                  >
+                    {/* =====================================
+                          EXPERIENCE HEADER
+                      ====================================== */}
+
+                    <header
+                      className="
+                          mb-4
+                          space-y-3
+                        "
+                    >
+                      <div
+                        className="
+                            flex
+                            flex-col
+                            gap-3
+
+                            sm:flex-row
+                            sm:items-start
+                            sm:justify-between
+                          "
+                      >
+                        <div
+                          className="
+                              flex
+                              min-w-0
+                              flex-wrap
+                              items-center
+                              gap-2
+                            "
+                        >
+                          <h3
+                            className={`
+                                text-base
+                                font-bold
+                                leading-snug
+
+                                sm:text-lg
+
+                                ${isLight ? "text-slate-950" : "text-slate-100"}
+                              `}
+                          >
+                            {item.role}
+                          </h3>
+
+                          {item.type && t.typeLabels[item.type] && (
+                            <span
+                              className={`
+                                    rounded-lg
+                                    border
+                                    px-2.5
+                                    py-1
+                                    font-mono
+                                    text-xs
+                                    font-semibold
+
+                                    ${getTypeBadgeStyle(item.type)}
+                                  `}
+                            >
+                              {t.typeLabels[item.type]}
+                            </span>
+                          )}
+                        </div>
+
+                        <span
+                          className={`
+                              inline-flex
+                              w-fit
+                              shrink-0
+                              items-center
+                              gap-1.5
+                              rounded-full
+                              border
+                              px-3
+                              py-1.5
+                              font-mono
+                              text-xs
+                              font-medium
+
+                              ${
+                                isLight
+                                  ? `
+                                    border-slate-200
+                                    bg-white
+                                    text-slate-600
+                                  `
+                                  : `
+                                    border-dark-border
+                                    bg-dark-border/60
+                                    text-slate-300
+                                  `
+                              }
+                            `}
+                        >
+                          <span aria-hidden="true">◷</span>
+
+                          {item.period}
+                        </span>
+                      </div>
+
+                      {/* Company & location */}
+                      <div
+                        className="
+                            flex
+                            flex-wrap
+                            items-center
+                            gap-x-2
+                            gap-y-1
+                          "
+                      >
+                        <span
+                          className="
+                              font-mono
+                              text-sm
+                              font-semibold
+                              text-accent-blue
+                            "
+                        >
+                          @ {item.company}
+                        </span>
+
+                        <span
+                          aria-hidden="true"
+                          className={
+                            isLight ? "text-slate-400" : "text-slate-500"
+                          }
+                        >
+                          •
+                        </span>
+
+                        <span
+                          className={`
+                              text-sm
+
+                              ${isLight ? "text-slate-600" : "text-slate-400"}
+                            `}
+                        >
+                          <span aria-hidden="true">📍 </span>
+
+                          {item.location}
+                        </span>
+                      </div>
+                    </header>
+
+                    {/* =====================================
+                          DESCRIPTION
+                      ====================================== */}
+
+                    <p
+                      className={`
+                          mb-5
+                          text-sm
+                          leading-7
+
+                          ${isLight ? "text-slate-700" : "text-slate-300"}
+                        `}
+                    >
+                      {item.description}
+                    </p>
+
+                    {/* =====================================
+                          CONTRIBUTIONS
+                      ====================================== */}
+
+                    {item.highlights && item.highlights.length > 0 && (
+                      <section
+                        aria-labelledby={`${item.id}-highlights`}
+                        className="
+                              mb-5
+                              space-y-2
+                            "
+                      >
+                        <h4
+                          id={`${item.id}-highlights`}
+                          className={`
+                                font-mono
+                                text-xs
+                                font-semibold
+                                uppercase
+                                tracking-wider
+
+                                ${isLight ? "text-slate-600" : "text-slate-400"}
+                              `}
+                        >
+                          // Key Contributions & Impact
+                        </h4>
+
+                        <ul className="space-y-2">
+                          {item.highlights.map((highlight) => (
+                            <li
+                              key={highlight}
+                              className={`
+                                      flex
+                                      items-start
+                                      gap-2.5
+                                      text-sm
+                                      leading-6
+
+                                      ${
+                                        isLight
+                                          ? "text-slate-700"
+                                          : "text-slate-300"
+                                      }
+                                    `}
+                            >
+                              <span
+                                aria-hidden="true"
+                                className="
+                                        mt-0.5
+                                        shrink-0
+                                        font-bold
+                                        text-accent-blue
+                                      "
+                              >
+                                ›
+                              </span>
+
+                              <span>{highlight}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </section>
+                    )}
+
+                    {/* =====================================
+                          TECH STACK
+                      ====================================== */}
+
+                    {item.techStack.length > 0 && (
+                      <section
+                        aria-label={`${item.role} technology stack`}
+                        className={`
+                            border-t
+                            pt-4
+
+                            ${
+                              isLight
+                                ? "border-slate-200"
+                                : "border-dark-border/60"
+                            }
+                          `}
+                      >
+                        <ul
+                          className="
+                              flex
+                              flex-wrap
+                              gap-2
+                            "
+                        >
+                          {item.techStack.map((tech) => (
+                            <li key={tech}>
+                              <span
+                                className={`
+                                      inline-flex
+                                      rounded-lg
+                                      border
+                                      px-2.5
+                                      py-1.5
+                                      font-mono
+                                      text-xs
+                                      font-medium
+
+                                      ${
+                                        isLight
+                                          ? `
+                                            border-slate-200
+                                            bg-white
+                                            text-slate-700
+                                          `
+                                          : `
+                                            border-dark-border
+                                            bg-dark-border/50
+                                            text-slate-300
+                                          `
+                                      }
+                                    `}
+                              >
+                                {tech}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </section>
+                    )}
+                  </article>
+                </li>
+              ))}
+            </ol>
+          )}
+        </section>
       </div>
     </ModalContainer>
   );

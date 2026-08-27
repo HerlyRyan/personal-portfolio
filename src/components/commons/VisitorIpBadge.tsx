@@ -1,117 +1,410 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
+
 import { useSystem } from "../../context/SystemContext";
+
+const DEFAULT_VISITOR_NAME = "Guest";
+const MAX_VISITOR_NAME_LENGTH = 24;
 
 export const VisitorIpBadge: React.FC = () => {
   const { theme } = useSystem();
+
   const isLight = theme === "light";
 
-  const [ipAddress, setIpAddress] = useState<string>("Connecting...");
-  const [visitorName, setVisitorName] = useState<string>("Guest");
-  const [ping, setPing] = useState<number>(0);
-  const [isEditingName, setIsEditingName] = useState<boolean>(false);
+  const [visitorName, setVisitorName] = useState<string>(DEFAULT_VISITOR_NAME);
+
   const [tempName, setTempName] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(true);
 
+  const [latency, setLatency] = useState<number | null>(null);
+
+  const [isEditingName, setIsEditingName] = useState(false);
+
+  const [networkStatus, setNetworkStatus] = useState<
+    "checking" | "online" | "offline"
+  >("checking");
+
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  /**
+   * Restore visitor alias from localStorage.
+   */
   useEffect(() => {
-    // 1. Ambil Nama dari LocalStorage jika sudah pernah diatur sebelumnya
     const savedName = localStorage.getItem("sys_visitor_name");
-    if (savedName) {
-      setVisitorName(savedName);
+
+    if (savedName?.trim()) {
+      setVisitorName(savedName.trim());
     }
-
-    // 2. Simulasi / Hitung Latency (Ping) sederhana
-    const startTime = performance.now();
-
-    // 3. Fetch IP Pengunjung
-    fetch("https://api.ipify.org?format=json")
-      .then((res) => res.json())
-      .then((data) => {
-        setIpAddress(data.ip || "127.0.0.1");
-        const endTime = performance.now();
-        setPing(Math.round(endTime - startTime));
-        setIsLoading(false);
-      })
-      .catch(() => {
-        setIpAddress("(Local)");
-        setPing(12);
-        setIsLoading(false);
-      });
   }, []);
 
-  const handleSaveName = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (tempName.trim()) {
-      setVisitorName(tempName.trim());
-      localStorage.setItem("sys_visitor_name", tempName.trim());
+  /**
+   * Measure HTTP request latency.
+   *
+   * Important:
+   * this is NOT ICMP ping.
+   * It measures approximately how long a small HTTP
+   * request takes from the browser.
+   */
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const checkNetwork = async () => {
+      const startTime = performance.now();
+
+      try {
+        await fetch("https://api.ipify.org?format=json", {
+          signal: controller.signal,
+          cache: "no-store",
+        });
+
+        const duration = performance.now() - startTime;
+
+        setLatency(Math.round(duration));
+
+        setNetworkStatus("online");
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+
+        setLatency(null);
+        setNetworkStatus("offline");
+      }
+    };
+
+    void checkNetwork();
+
+    return () => {
+      controller.abort();
+    };
+  }, []);
+
+  /**
+   * Focus input immediately when edit mode opens.
+   */
+  useEffect(() => {
+    if (!isEditingName) {
+      return;
     }
+
+    inputRef.current?.focus();
+    inputRef.current?.select();
+  }, [isEditingName]);
+
+  const handleStartEditing = () => {
+    setTempName(visitorName);
+    setIsEditingName(true);
+  };
+
+  const handleCancelEditing = () => {
+    setTempName("");
     setIsEditingName(false);
   };
 
+  const handleSaveName = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const normalizedName = tempName.trim();
+
+    if (normalizedName) {
+      setVisitorName(normalizedName);
+
+      localStorage.setItem("sys_visitor_name", normalizedName);
+    }
+
+    setIsEditingName(false);
+  };
+
+  const handleInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Escape") {
+      handleCancelEditing();
+    }
+  };
+
+  const networkLabel =
+    networkStatus === "checking"
+      ? "Checking"
+      : networkStatus === "online"
+        ? "Online"
+        : "Offline";
+
   return (
     <div
-      className={`px-3 py-1.5 rounded-2xl border flex items-center gap-3 transition-all backdrop-blur-md font-mono text-xs ${
-        isLight
-          ? "bg-slate-100/80 border-slate-200/80 text-slate-700 shadow-xs"
-          : "bg-navy-base/60 border-dark-border/80 text-slate-300 shadow-lg shadow-black/20"
+      className={`
+        inline-flex
+        max-w-full
+        items-center
+        gap-2
+        rounded-2xl
+        border
+        px-3
+        py-1.5
+        font-mono
+        text-xs
+        transition-colors
+        backdrop-blur-md
+
+        ${
+          isLight
+            ? `
+              border-slate-300
+              bg-white/80
+              text-slate-700
+              shadow-sm
+            `
+            : `
+              border-dark-border
+              bg-navy-base/70
+              text-slate-300
+              shadow-lg
+              shadow-black/20
+            `
+        }
+      `}
+      aria-label={`System network ${networkLabel}. Visitor ${visitorName}${
+        latency !== null ? `. Request latency ${latency} milliseconds` : ""
       }`}
     >
-      {/* Indikator Status Koneksi Berkelip */}
-      <div className="flex items-center gap-1.5 shrink-0">
-        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-        <span className="text-[10px] font-semibold text-accent-blue uppercase tracking-wider hidden sm:inline">
-          SYS_NET:
+      {/* =================================================
+          NETWORK STATUS
+      ================================================== */}
+      <div
+        className="
+          flex
+          shrink-0
+          items-center
+          gap-1.5
+        "
+      >
+        <span
+          aria-hidden="true"
+          className={`
+            h-2
+            w-2
+            rounded-full
+
+            ${
+              networkStatus === "offline"
+                ? "bg-red-500"
+                : networkStatus === "checking"
+                  ? "bg-amber-500 motion-safe:animate-pulse"
+                  : "bg-emerald-500"
+            }
+          `}
+        />
+
+        <span
+          aria-hidden="true"
+          className="
+            hidden
+            font-semibold
+            uppercase
+            tracking-wider
+            text-accent-blue
+
+            sm:inline
+          "
+        >
+          SYS_NET
         </span>
       </div>
 
-      {/* Identitas Pengunjung (Bisa diklik untuk diubah) */}
-      <div className="flex items-center gap-1">
-        <span className="text-[10px] text-slate-400">user:</span>
+      {/* Divider */}
+      <span
+        aria-hidden="true"
+        className={`
+          hidden
+          h-4
+          w-px
+
+          sm:block
+
+          ${isLight ? "bg-slate-300" : "bg-dark-border"}
+        `}
+      />
+
+      {/* =================================================
+          VISITOR ALIAS
+      ================================================== */}
+      <div
+        className="
+          flex
+          min-w-0
+          items-center
+          gap-1.5
+        "
+      >
+        <span
+          className={`
+            hidden
+
+            sm:inline
+
+            ${isLight ? "text-slate-500" : "text-slate-400"}
+          `}
+        >
+          user:
+        </span>
+
         {isEditingName ? (
-          <form onSubmit={handleSaveName} className="flex items-center gap-1">
+          <form
+            onSubmit={handleSaveName}
+            className="
+              flex
+              items-center
+              gap-1
+            "
+          >
+            <label htmlFor="visitor-name" className="sr-only">
+              Visitor name
+            </label>
+
             <input
+              ref={inputRef}
+              id="visitor-name"
               type="text"
               value={tempName}
-              placeholder={visitorName}
-              autoFocus
-              onChange={(e) => setTempName(e.target.value)}
+              maxLength={MAX_VISITOR_NAME_LENGTH}
+              onChange={(event) => setTempName(event.target.value)}
+              onKeyDown={handleInputKeyDown}
               onBlur={() => setIsEditingName(false)}
-              className={`px-1.5 py-0.5 rounded text-xs outline-none w-24 font-mono ${
-                isLight ? "bg-white border border-slate-300 text-slate-900" : "bg-dark-border text-white"
-              }`}
+              className={`
+                h-8
+                w-24
+                rounded-md
+                border
+                px-2
+                font-mono
+                text-xs
+
+                focus-visible:outline-none
+                focus-visible:ring-2
+                focus-visible:ring-accent-blue
+
+                ${
+                  isLight
+                    ? `
+                      border-slate-300
+                      bg-white
+                      text-slate-950
+                    `
+                    : `
+                      border-dark-border
+                      bg-dark-card
+                      text-slate-100
+                    `
+                }
+              `}
             />
           </form>
         ) : (
           <button
-            onClick={() => {
-              setTempName(visitorName);
-              setIsEditingName(true);
-            }}
-            className="font-bold text-accent-blue hover:underline cursor-pointer"
-            title="Klik untuk mengubah nama panggilan"
+            type="button"
+            onClick={handleStartEditing}
+            className="
+              inline-flex
+              min-h-8
+              max-w-28
+              items-center
+              truncate
+              rounded-md
+              px-1
+              font-semibold
+              text-accent-blue
+              transition-colors
+
+              hover:underline
+
+              focus-visible:outline-none
+              focus-visible:ring-2
+              focus-visible:ring-accent-blue
+              focus-visible:ring-offset-2
+            "
+            aria-label={`Edit visitor name. Current name: ${visitorName}`}
+            title="Edit visitor name"
           >
             @{visitorName}
           </button>
         )}
       </div>
 
-      <span className={`w-px h-3 ${isLight ? "bg-slate-300" : "bg-dark-border"}`} />
+      {/* =================================================
+          NETWORK INFORMATION
+      ================================================== */}
+      <span
+        aria-hidden="true"
+        className={`
+          hidden
+          h-4
+          w-px
 
-      {/* IP Address */}
-      <div className="flex items-center gap-1">
-        <span className="text-[10px] text-slate-400">Your IP:</span>
-        <span className={`font-semibold ${isLoading ? "text-slate-400 animate-pulse" : ""}`}>
-          {ipAddress}
+          md:block
+
+          ${isLight ? "bg-slate-300" : "bg-dark-border"}
+        `}
+      />
+
+      <div
+        className="
+          hidden
+          items-center
+          gap-1.5
+
+          md:flex
+        "
+      >
+        <span className={isLight ? "text-slate-500" : "text-slate-400"}>
+          net:
+        </span>
+
+        <span
+          className={`
+            font-semibold
+
+            ${
+              networkStatus === "offline"
+                ? "text-red-500"
+                : networkStatus === "checking"
+                  ? "text-amber-500"
+                  : "text-emerald-500"
+            }
+          `}
+        >
+          {networkLabel}
         </span>
       </div>
 
-      <span className={`w-px h-3 hidden md:block ${isLight ? "bg-slate-300" : "bg-dark-border"}`} />
+      {latency !== null && (
+        <>
+          <span
+            aria-hidden="true"
+            className={`
+              hidden
+              h-4
+              w-px
 
-      {/* System Metrics (Ping) */}
-      <div className="hidden md:flex items-center gap-1">
-        <span className="text-[10px] text-slate-400">ping:</span>
-        <span className="text-emerald-500 font-semibold">{ping ? `${ping}ms` : "Sync..."}</span>
-      </div>
+              lg:block
+
+              ${isLight ? "bg-slate-300" : "bg-dark-border"}
+            `}
+          />
+
+          <div
+            className="
+              hidden
+              items-center
+              gap-1
+
+              lg:flex
+            "
+          >
+            <span className={isLight ? "text-slate-500" : "text-slate-400"}>
+              latency:
+            </span>
+
+            <span className="font-semibold text-emerald-500">{latency}ms</span>
+          </div>
+        </>
+      )}
     </div>
   );
 };

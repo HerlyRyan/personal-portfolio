@@ -15,6 +15,13 @@ export const id = {
       'Berfokus pada perancangan arsitektur backend yang kokoh, manajemen database terstruktur, dan integrasi sistem berperforma tinggi untuk mendukung produktivitas enterprise secara menyeluruh.',
     secureConnection: '[Koneksi Aman]',
   },
+  confirmationModal: {
+    title: 'Buka Link eksternal?',
+    description:'Anda akan meninggalkan portfolio ini dan membuka alamat berikut di tab baru.',
+    destination: 'Tujuan',
+    noButton: 'Tidak',
+    yesButton: 'Ya, Lanjutkan'
+  },
   projectsModal: projectsId,
   experienceModal: experienceId,
   skillsModal: skills,

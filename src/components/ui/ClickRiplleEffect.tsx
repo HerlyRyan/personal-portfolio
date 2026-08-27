@@ -33,7 +33,7 @@ export const ClickRippleEffect: React.FC<{ children: React.ReactNode }> = ({ chi
       onClickCapture={handleCaptureClick}
     >
       {/* Container global dengan z-index ekstrem agar selalu di atas modal */}
-      <div className="fixed inset-0 pointer-events-none z-[99999] overflow-hidden">
+      <div className="fixed inset-0 pointer-events-none z-99999 overflow-hidden">
         <AnimatePresence>
           {sparkles.map((sparkle) => (
             <motion.div

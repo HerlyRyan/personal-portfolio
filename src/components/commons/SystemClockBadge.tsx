@@ -1,57 +1,161 @@
-/* eslint-disable react-hooks/set-state-in-effect */
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+
 import { useSystem } from "../../context/SystemContext";
 
 export const SystemClockBadge: React.FC = () => {
   const { theme } = useSystem();
+
   const isLight = theme === "light";
 
-  const [timeString, setTimeString] = useState<string>("");
-  const [timeZone, setTimeZone] = useState<string>("UTC");
+  const [currentTime, setCurrentTime] = useState<Date>(() => new Date());
+
+  const timeZone = useMemo(() => {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+  }, []);
+
+  const timeFormatter = useMemo(() => {
+    return new Intl.DateTimeFormat("en-GB", {
+      timeZone,
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    });
+  }, [timeZone]);
+
+  const mobileTimeFormatter = useMemo(() => {
+    return new Intl.DateTimeFormat("en-GB", {
+      timeZone,
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+  }, [timeZone]);
 
   useEffect(() => {
-    // Mendapatkan zona waktu lokal perangkat user secara global
-    const detectedTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
-    setTimeZone(detectedTimeZone);
+    const timer = window.setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
 
-    const updateClock = () => {
-      const now = new Date();
-      // Format jam sesuai zona waktu user (format 24 Jam dengan Detik)
-      const formatted = new Intl.DateTimeFormat("en-GB", {
-        timeZone: detectedTimeZone,
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: false,
-      }).format(now);
-
-      setTimeString(formatted);
+    return () => {
+      window.clearInterval(timer);
     };
-
-    updateClock();
-    const timer = setInterval(updateClock, 1000);
-
-    return () => clearInterval(timer);
   }, []);
+
+  const fullTime = timeFormatter.format(currentTime);
+
+  const compactTime = mobileTimeFormatter.format(currentTime);
+
+  const city = timeZone.split("/").pop()?.replaceAll("_", " ") ?? "UTC";
 
   return (
     <div
-      className={`px-3 py-1.5 rounded-2xl border flex items-center gap-2 transition-all backdrop-blur-md font-mono text-xs ${
-        isLight
-          ? "bg-slate-100/80 border-slate-200/80 text-slate-700 shadow-xs"
-          : "bg-navy-base/60 border-dark-border/80 text-slate-300 shadow-lg shadow-black/20"
-      }`}
-      title={`Local Timezone: ${timeZone}`}
+      className={`
+        inline-flex
+        h-11
+        shrink-0
+        items-center
+        gap-2
+        whitespace-nowrap
+        rounded-2xl
+        border
+        px-3
+        font-mono
+        transition-colors
+        backdrop-blur-md
+
+        ${
+          isLight
+            ? `
+              border-slate-300
+              bg-white/80
+              text-slate-700
+              shadow-sm
+            `
+            : `
+              border-dark-border
+              bg-navy-base/70
+              text-slate-300
+              shadow-lg
+              shadow-black/20
+            `
+        }
+      `}
+      title={`Local timezone: ${timeZone}`}
+      aria-label={`Local time ${fullTime}, timezone ${city}`}
     >
-      <span className="w-2 h-2 rounded-full bg-accent-blue animate-pulse shrink-0" />
-      <span className="text-[10px] font-semibold text-accent-blue uppercase tracking-wider">
+      {/* Status indicator */}
+      <span
+        aria-hidden="true"
+        className="
+          h-2
+          w-2
+          shrink-0
+          rounded-full
+          bg-accent-blue
+          motion-safe:animate-pulse
+        "
+      />
+
+      {/* Desktop/tablet label */}
+      <span
+        aria-hidden="true"
+        className="
+          hidden
+          text-xs
+          font-semibold
+          uppercase
+          tracking-wider
+          text-accent-blue
+
+          sm:inline
+        "
+      >
         TIME:
       </span>
-      <span className="font-bold tracking-wider">
-        {timeString || "00:00:00"}
+
+      {/* Mobile clock */}
+      <span
+        aria-hidden="true"
+        className="
+          text-xs
+          font-semibold
+          tracking-wide
+
+          sm:hidden
+        "
+      >
+        {compactTime}
       </span>
-      <span className="text-[9px] opacity-60 hidden sm:inline">
-        ({timeZone.split("/").pop()?.replace("_", " ")})
+
+      {/* Desktop clock */}
+      <span
+        aria-hidden="true"
+        className="
+          hidden
+          text-xs
+          font-semibold
+          tracking-wider
+
+          sm:inline
+        "
+      >
+        {fullTime}
+      </span>
+
+      {/* Timezone - desktop only */}
+      <span
+        aria-hidden="true"
+        className={`
+          hidden
+          text-xs
+
+          md:inline
+
+          ${isLight ? "text-slate-500" : "text-slate-400"}
+        `}
+      >
+        ({city})
       </span>
     </div>
   );

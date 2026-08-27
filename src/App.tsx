@@ -1,24 +1,61 @@
-import { useState } from 'react';
-import { SystemCardLayout } from './components/layout/SystemCardLayout';
-import { Footer } from './components/layout/Footer';
-import { SystemLoader } from './components/ui/SystemLoader';
-import { SystemBackground } from './components/layout/SystemBackground';
+import { useState } from "react";
+import { SystemCardLayout } from "./components/layout/SystemCardLayout";
+import { Footer } from "./components/layout/Footer";
+import { SystemLoader } from "./components/ui/SystemLoader";
+import { SystemBackground } from "./components/layout/SystemBackground";
+import { ConfirmExternalModal } from "./components/ui/ConfirmModal";
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
 
   return (
     <SystemBackground>
-      {/* Tampilkan System Loader saat pertama kali dimuat */}
       {isLoading && <SystemLoader onLoadComplete={() => setIsLoading(false)} />}
 
-      {/* min-h-screen untuk mobile (bisa di-scroll jika sesak), md:h-screen md:overflow-hidden untuk desktop (terkunci) */}
-      <div className={`min-h-screen md:h-screen w-full flex flex-col items-center justify-between py-6 md:py-4 md:overflow-hidden transition-opacity duration-700 ${isLoading ? 'opacity-0' : 'opacity-100'}`}>
-        <div className="flex-1 flex items-center justify-center w-full my-auto">
+      <div
+        className={`
+          portfolio-desktop-viewport
+
+          min-h-dvh
+          w-full
+
+          flex
+          flex-col
+
+          items-center
+          justify-between
+
+          px-4
+          py-4
+
+          sm:px-6
+
+          lg:px-8
+          lg:py-4
+
+          transition-opacity
+          duration-700
+
+          ${isLoading ? "opacity-0" : "opacity-100"}
+        `}
+      >
+        <main
+          id="main-content"
+          className="
+            flex
+            min-h-0
+            w-full
+            flex-1
+            items-center
+            justify-center
+          "
+        >
           <SystemCardLayout />
-        </div>
+        </main>
+
         <Footer />
       </div>
+      <ConfirmExternalModal/>
     </SystemBackground>
   );
 }

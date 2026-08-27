@@ -1,143 +1,368 @@
 /* eslint-disable react-refresh/only-export-components */
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
-import { id } from '../locales/id';
-import { en } from '../locales/en';
 
-type Language = 'EN' | 'ID';
-type Theme = 'dark' | 'light';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+
+import { id } from "../locales/id";
+import { en } from "../locales/en";
+
+export type Language = "EN" | "ID";
+export type Theme = "dark" | "light";
+
 export type ModalType = "projects" | "experience" | "skills" | "about" | null;
+
+type OpenableModal = Exclude<ModalType, null>;
 
 interface SystemContextType {
   lang: Language;
   toggleLang: () => void;
+
   theme: Theme;
   toggleTheme: () => void;
+
   systemLang: typeof id;
+
   activeModal: ModalType;
   loadingPath: string | null;
-  openModal: (id: ModalType, path: string) => void;
+
+  openModal: (id: OpenableModal, path: string) => void;
+
   closeModal: (exitPath?: string) => void;
+
   confirmUrl: string | null;
+
   requestExternalUrl: (url: string) => void;
+
   clearExternalUrl: () => void;
+}
+
+interface SystemProviderProps {
+  children: React.ReactNode;
 }
 
 const SystemContext = createContext<SystemContextType | undefined>(undefined);
 
-export const SystemProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [lang, setLang] = useState<Language>(() => {
-    return (localStorage.getItem('sys_lang') as Language) || 'ID';
-  });
-  
-  const [theme, setTheme] = useState<Theme>(() => {
-    return (localStorage.getItem('sys_theme') as Theme) || 'dark';
-  });
+const DEFAULT_LANGUAGE: Language = "EN";
+const DEFAULT_THEME: Theme = "dark";
 
-  // State terpusat untuk modal dan loading path terminal
+const MODAL_OPEN_DELAY = 500;
+const MODAL_CLOSE_DELAY = 400;
+
+const isValidLanguage = (value: string | null): value is Language => {
+  return value === "EN" || value === "ID";
+};
+
+const isValidTheme = (value: string | null): value is Theme => {
+  return value === "dark" || value === "light";
+};
+
+const getInitialLanguage = (): Language => {
+  const savedLanguage = localStorage.getItem("sys_lang");
+
+  if (isValidLanguage(savedLanguage)) {
+    return savedLanguage;
+  }
+
+  const browserLanguage =
+    navigator.languages?.[0] ?? navigator.language ?? "en";
+
+  return browserLanguage.toLowerCase().startsWith("id")
+    ? "ID"
+    : DEFAULT_LANGUAGE;
+};
+
+const getInitialTheme = (): Theme => {
+  const savedTheme = localStorage.getItem("sys_theme");
+
+  if (isValidTheme(savedTheme)) {
+    return savedTheme;
+  }
+
+  const prefersLight = window.matchMedia(
+    "(prefers-color-scheme: light)",
+  ).matches;
+
+  return prefersLight ? "light" : DEFAULT_THEME;
+};
+
+export const SystemProvider: React.FC<SystemProviderProps> = ({ children }) => {
+  const [lang, setLang] = useState<Language>(getInitialLanguage);
+
+  const [theme, setTheme] = useState<Theme>(getInitialTheme);
+
   const [activeModal, setActiveModal] = useState<ModalType>(null);
+
   const [loadingPath, setLoadingPath] = useState<string | null>(null);
-
-  useEffect(() => {
-    localStorage.setItem('sys_lang', lang);
-  }, [lang]);
-
-  useEffect(() => {
-    localStorage.setItem('sys_theme', theme);
-    if (theme === 'light') {
-      document.documentElement.classList.add('light-theme');
-    } else {
-      document.documentElement.classList.remove('light-theme');
-    }
-  }, [theme]);
-
-  const systemLang = lang === 'ID' ? id : en;
-
-  const toggleLang = () => setLang((prev) => (prev === 'EN' ? 'ID' : 'EN'));
-  const toggleTheme = () => {
-    document.documentElement.classList.add('theme-switching');
-    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        document.documentElement.classList.remove('theme-switching');
-      });
-    });
-  };
-
-  // Fungsi global untuk membuka modal dengan efek loading path
-  const openModal = (id: ModalType, path: string) => {
-    requestAnimationFrame(() => {
-      setLoadingPath(path);
-      setTimeout(() => {
-        setLoadingPath(null);
-        setActiveModal(id);
-      }, 800);
-    });
-  };
-
-  const closeModal = (exitPath: string = "~/sys/home") => {
-    setLoadingPath(exitPath);
-    setTimeout(() => {
-      setLoadingPath(null);
-      setActiveModal(null);
-    }, 600);
-
-    if (closingViaPopState.current) {
-      // Modal ditutup KARENA back/swipe -> entry sudah otomatis "dikonsumsi" browser,
-      // jangan history.back() lagi, cukup reset flag
-      closingViaPopState.current = false;
-    } else if (window.history.state?.modalOpen) {
-      // Modal ditutup lewat cara lain (klik X, klik backdrop, dsb)
-      // -> kita yang harus "buang" entry penyangga
-      window.history.back();
-    }
-  };
-
-  // Flag: apakah modal sedang ditutup KARENA popstate (back button/swipe),
-  // supaya closeModal() tidak ikut manggil history.back() lagi (double-pop)
-  const closingViaPopState = useRef(false);
-
-  // Satu-satunya tempat push/pop history untuk SEMUA modal
-  useEffect(() => {
-    if (!activeModal) return;
-
-    window.history.pushState({ modalOpen: true }, '');
-
-    const handlePopState = () => {
-      closingViaPopState.current = true;
-      closeModal(); // pakai default exitPath "~/sys/home"
-    };
-
-    window.addEventListener('popstate', handlePopState);
-    return () => {
-      window.removeEventListener('popstate', handlePopState);
-    };
-  }, [activeModal]);  
 
   const [confirmUrl, setConfirmUrl] = useState<string | null>(null);
 
-  const requestExternalUrl = (url: string) => {
-    setConfirmUrl(url);
-  };
+  /*
+   * Menandai bahwa modal sedang ditutup karena browser
+   * Back / gesture navigation.
+   */
+  const closingViaPopState = useRef(false);
 
-  const clearExternalUrl = () => {
+  /*
+   * Menyimpan timer supaya bisa dibersihkan jika
+   * component unmount atau user melakukan aksi lain.
+   */
+  const navigationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  /*
+   * Menyimpan element yang mempunyai focus sebelum
+   * modal dibuka.
+   *
+   * Nantinya focus bisa dikembalikan ketika modal
+   * selesai ditutup.
+   */
+  const previousFocusedElementRef = useRef<HTMLElement | null>(null);
+
+  const clearNavigationTimer = useCallback(() => {
+    if (!navigationTimerRef.current) {
+      return;
+    }
+
+    clearTimeout(navigationTimerRef.current);
+
+    navigationTimerRef.current = null;
+  }, []);
+
+  /*
+   * =====================================================
+   * LANGUAGE
+   * =====================================================
+   */
+
+  useEffect(() => {
+    localStorage.setItem("sys_lang", lang);
+
+    /*
+     * Accessibility:
+     * screen reader menggunakan atribut lang
+     * untuk menentukan pronunciation.
+     */
+    document.documentElement.lang = lang === "ID" ? "id" : "en";
+  }, [lang]);
+
+  const toggleLang = useCallback(() => {
+    setLang((previousLanguage) => (previousLanguage === "EN" ? "ID" : "EN"));
+  }, []);
+
+  /*
+   * =====================================================
+   * THEME
+   * =====================================================
+   */
+
+  useEffect(() => {
+    localStorage.setItem("sys_theme", theme);
+
+    document.documentElement.classList.toggle("light-theme", theme === "light");
+
+    /*
+     * Memberi tahu browser mengenai color scheme.
+     *
+     * Ini juga membantu browser-native UI seperti
+     * form controls dan scrollbar.
+     */
+    document.documentElement.style.colorScheme = theme;
+  }, [theme]);
+
+  const toggleTheme = useCallback(() => {
+    document.documentElement.classList.add("theme-switching");
+
+    setTheme((previousTheme) => (previousTheme === "dark" ? "light" : "dark"));
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        document.documentElement.classList.remove("theme-switching");
+      });
+    });
+  }, []);
+
+  /*
+   * =====================================================
+   * TRANSLATION
+   * =====================================================
+   */
+
+  const systemLang = lang === "ID" ? id : en;
+
+  /*
+   * =====================================================
+   * MODAL NAVIGATION
+   * =====================================================
+   */
+
+  const openModal = useCallback(
+    (modalId: OpenableModal, path: string) => {
+      /*
+       * Mencegah multiple navigation timer ketika
+       * user melakukan double-click.
+       */
+      clearNavigationTimer();
+
+      /*
+       * Simpan button/link yang membuka modal.
+       */
+      if (document.activeElement instanceof HTMLElement) {
+        previousFocusedElementRef.current = document.activeElement;
+      }
+
+      setLoadingPath(path);
+
+      navigationTimerRef.current = setTimeout(() => {
+        setLoadingPath(null);
+        setActiveModal(modalId);
+
+        navigationTimerRef.current = null;
+      }, MODAL_OPEN_DELAY);
+    },
+    [clearNavigationTimer],
+  );
+
+  const closeModal = useCallback(
+    (exitPath: string = "~/sys/home") => {
+      clearNavigationTimer();
+
+      setLoadingPath(exitPath);
+
+      navigationTimerRef.current = setTimeout(() => {
+        setLoadingPath(null);
+        setActiveModal(null);
+
+        /*
+         * Setelah modal benar-benar tertutup,
+         * kembalikan keyboard focus ke element
+         * yang sebelumnya membuka modal.
+         */
+        requestAnimationFrame(() => {
+          previousFocusedElementRef.current?.focus();
+
+          previousFocusedElementRef.current = null;
+        });
+
+        navigationTimerRef.current = null;
+      }, MODAL_CLOSE_DELAY);
+
+      /*
+       * Jika close terjadi akibat popstate,
+       * browser sudah memindahkan history.
+       *
+       * Jangan menjalankan history.back()
+       * untuk kedua kalinya.
+       */
+      if (closingViaPopState.current) {
+        closingViaPopState.current = false;
+        return;
+      }
+
+      /*
+       * Jika modal ditutup dari tombol X,
+       * backdrop, Escape, dll,
+       * buang history entry modal.
+       */
+      if (window.history.state?.modalOpen) {
+        window.history.back();
+      }
+    },
+    [clearNavigationTimer],
+  );
+
+  /*
+   * =====================================================
+   * BROWSER HISTORY
+   * =====================================================
+   */
+
+  useEffect(() => {
+    if (!activeModal) {
+      return;
+    }
+
+    /*
+     * Hindari push entry modal berulang jika
+     * state yang aktif sudah merupakan modal.
+     */
+    if (!window.history.state?.modalOpen) {
+      window.history.pushState(
+        {
+          modalOpen: true,
+          modal: activeModal,
+        },
+        "",
+      );
+    }
+
+    const handlePopState = () => {
+      /*
+       * Kalau modal sudah tidak ada,
+       * tidak perlu melakukan apa pun.
+       */
+      if (!activeModal) {
+        return;
+      }
+
+      closingViaPopState.current = true;
+
+      closeModal();
+    };
+
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [activeModal, closeModal]);
+
+  /*
+   * Bersihkan timer ketika provider unmount.
+   */
+  useEffect(() => {
+    return () => {
+      clearNavigationTimer();
+    };
+  }, [clearNavigationTimer]);
+
+  /*
+   * =====================================================
+   * EXTERNAL URL CONFIRMATION
+   * =====================================================
+   */
+
+  const requestExternalUrl = useCallback((url: string) => {
+    setConfirmUrl(url);
+  }, []);
+
+  const clearExternalUrl = useCallback(() => {
     setConfirmUrl(null);
-  };
+  }, []);
 
   return (
-    <SystemContext.Provider 
-      value={{ 
-        lang, 
-        toggleLang, 
-        theme, 
-        toggleTheme, 
+    <SystemContext.Provider
+      value={{
+        lang,
+        toggleLang,
+
+        theme,
+        toggleTheme,
+
         systemLang,
+
         activeModal,
         loadingPath,
         openModal,
         closeModal,
+
         confirmUrl,
         requestExternalUrl,
-        clearExternalUrl
+        clearExternalUrl,
       }}
     >
       {children}
@@ -147,6 +372,10 @@ export const SystemProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
 export const useSystem = () => {
   const context = useContext(SystemContext);
-  if (!context) throw new Error('useSystem must be used within a SystemProvider');
+
+  if (!context) {
+    throw new Error("useSystem must be used within a SystemProvider");
+  }
+
   return context;
 };
