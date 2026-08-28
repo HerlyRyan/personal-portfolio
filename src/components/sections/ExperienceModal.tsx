@@ -29,6 +29,10 @@ export const ExperienceModal: React.FC<ExperienceModalProps> = ({ isOpen }) => {
 
   const [selectedType, setSelectedType] = useState<ExperienceType | null>(null);
 
+  const [expandedExperienceId, setExpandedExperienceId] = useState<
+    string | null
+  >(null);
+
   /*
    * =====================================================
    * DATA DERIVATION
@@ -130,6 +134,12 @@ export const ExperienceModal: React.FC<ExperienceModalProps> = ({ isOpen }) => {
 
   const activeFilterCount =
     Number(Boolean(selectedType)) + Number(Boolean(selectedTech));
+
+  const handleExperienceToggle = (experienceId: string) => {
+    setExpandedExperienceId((currentId) =>
+      currentId === experienceId ? null : experienceId,
+    );
+  };
 
   return (
     <ModalContainer onClose={handleClose} titleId={titleId}>
@@ -559,18 +569,21 @@ export const ExperienceModal: React.FC<ExperienceModalProps> = ({ isOpen }) => {
                 sm:pl-6
               "
             >
-              {filteredExperience.map((item) => (
-                <li
-                  key={item.id}
-                  className="
+              {filteredExperience.map((item) => {
+                const isExpanded = expandedExperienceId === item.id;
+
+                return (
+                  <li
+                    key={item.id}
+                    className="
                       group
                       relative
                     "
-                >
-                  {/* Timeline marker */}
-                  <span
-                    aria-hidden="true"
-                    className="
+                  >
+                    {/* Timeline marker */}
+                    <span
+                      aria-hidden="true"
+                      className="
                         absolute
                         -left-7
                         top-6
@@ -589,320 +602,195 @@ export const ExperienceModal: React.FC<ExperienceModalProps> = ({ isOpen }) => {
 
                         sm:-left-8
                       "
-                  />
+                    />
 
-                  <article
-                    className={`
-                        rounded-2xl
-                        border
-                        p-5
-                        transition-colors
-
-                        sm:p-6
-
-                        ${
-                          isLight
-                            ? `
-                              border-slate-200
-                              bg-slate-50
-
-                              hover:border-accent-blue/40
-                            `
-                            : `
-                              border-dark-border
-                              bg-navy-base/50
-
-                              hover:border-accent-blue/40
-                            `
-                        }
-                      `}
-                  >
-                    {/* =====================================
-                          EXPERIENCE HEADER
-                      ====================================== */}
-
-                    <header
-                      className="
-                          mb-4
-                          space-y-3
-                        "
+                    <article
+                      className={`rounded-2xl border p-5 transition-colors sm:p-6 ${
+                        isLight
+                          ? "border-slate-200 bg-slate-50 hover:border-accent-blue/40"
+                          : "border-dark-border bg-navy-base/50 hover:border-accent-blue/40"
+                      }`}
                     >
-                      <div
-                        className="
-                            flex
-                            flex-col
-                            gap-3
-
-                            sm:flex-row
-                            sm:items-start
-                            sm:justify-between
-                          "
-                      >
-                        <div
-                          className="
-                              flex
-                              min-w-0
-                              flex-wrap
-                              items-center
-                              gap-2
-                            "
-                        >
-                          <h3
-                            className={`
-                                text-base
-                                font-bold
-                                leading-snug
-
-                                sm:text-lg
-
-                                ${isLight ? "text-slate-950" : "text-slate-100"}
-                              `}
-                          >
-                            {item.role}
-                          </h3>
-
-                          {item.type && t.typeLabels[item.type] && (
-                            <span
-                              className={`
-                                    rounded-lg
-                                    border
-                                    px-2.5
-                                    py-1
-                                    font-mono
-                                    text-xs
-                                    font-semibold
-
-                                    ${getTypeBadgeStyle(item.type)}
-                                  `}
+                      {/* EXPERIENCE SUMMARY */}
+                      <header className="space-y-3">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                          <div className="flex min-w-0 flex-wrap items-center gap-2">
+                            <h3
+                              className={`text-base font-bold leading-snug sm:text-lg ${
+                                isLight ? "text-slate-950" : "text-slate-100"
+                              }`}
                             >
-                              {t.typeLabels[item.type]}
-                            </span>
-                          )}
+                              {item.role}
+                            </h3>
+
+                            {item.type && t.typeLabels[item.type] && (
+                              <span
+                                className={`rounded-lg border px-2.5 py-1 font-mono text-xs font-semibold ${getTypeBadgeStyle(
+                                  item.type,
+                                )}`}
+                              >
+                                {t.typeLabels[item.type]}
+                              </span>
+                            )}
+                          </div>
+
+                          <span
+                            className={`inline-flex w-fit shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 font-mono text-xs font-medium ${
+                              isLight
+                                ? "border-slate-200 bg-white text-slate-600"
+                                : "border-dark-border bg-dark-border/60 text-slate-300"
+                            }`}
+                          >
+                            <span aria-hidden="true">◷</span>
+
+                            {item.period}
+                          </span>
                         </div>
 
-                        <span
-                          className={`
-                              inline-flex
-                              w-fit
-                              shrink-0
-                              items-center
-                              gap-1.5
-                              rounded-full
-                              border
-                              px-3
-                              py-1.5
-                              font-mono
-                              text-xs
-                              font-medium
+                        {/* COMPANY & LOCATION */}
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                          <span className="font-mono text-sm font-semibold text-accent-blue">
+                            @ {item.company}
+                          </span>
 
-                              ${
-                                isLight
-                                  ? `
-                                    border-slate-200
-                                    bg-white
-                                    text-slate-600
-                                  `
-                                  : `
-                                    border-dark-border
-                                    bg-dark-border/60
-                                    text-slate-300
-                                  `
-                              }
-                            `}
-                        >
-                          <span aria-hidden="true">◷</span>
-
-                          {item.period}
-                        </span>
-                      </div>
-
-                      {/* Company & location */}
-                      <div
-                        className="
-                            flex
-                            flex-wrap
-                            items-center
-                            gap-x-2
-                            gap-y-1
-                          "
-                      >
-                        <span
-                          className="
-                              font-mono
-                              text-sm
-                              font-semibold
-                              text-accent-blue
-                            "
-                        >
-                          @ {item.company}
-                        </span>
-
-                        <span
-                          aria-hidden="true"
-                          className={
-                            isLight ? "text-slate-400" : "text-slate-500"
-                          }
-                        >
-                          •
-                        </span>
-
-                        <span
-                          className={`
-                              text-sm
-
-                              ${isLight ? "text-slate-600" : "text-slate-400"}
-                            `}
-                        >
-                          <span aria-hidden="true">📍 </span>
-
-                          {item.location}
-                        </span>
-                      </div>
-                    </header>
-
-                    {/* =====================================
-                          DESCRIPTION
-                      ====================================== */}
-
-                    <p
-                      className={`
-                          mb-5
-                          text-sm
-                          leading-7
-
-                          ${isLight ? "text-slate-700" : "text-slate-300"}
-                        `}
-                    >
-                      {item.description}
-                    </p>
-
-                    {/* =====================================
-                          CONTRIBUTIONS
-                      ====================================== */}
-
-                    {item.highlights && item.highlights.length > 0 && (
-                      <section
-                        aria-labelledby={`${item.id}-highlights`}
-                        className="
-                              mb-5
-                              space-y-2
-                            "
-                      >
-                        <h4
-                          id={`${item.id}-highlights`}
-                          className={`
-                                font-mono
-                                text-xs
-                                font-semibold
-                                uppercase
-                                tracking-wider
-
-                                ${isLight ? "text-slate-600" : "text-slate-400"}
-                              `}
-                        >
-                          // Key Contributions & Impact
-                        </h4>
-
-                        <ul className="space-y-2">
-                          {item.highlights.map((highlight) => (
-                            <li
-                              key={highlight}
-                              className={`
-                                      flex
-                                      items-start
-                                      gap-2.5
-                                      text-sm
-                                      leading-6
-
-                                      ${
-                                        isLight
-                                          ? "text-slate-700"
-                                          : "text-slate-300"
-                                      }
-                                    `}
-                            >
-                              <span
-                                aria-hidden="true"
-                                className="
-                                        mt-0.5
-                                        shrink-0
-                                        font-bold
-                                        text-accent-blue
-                                      "
-                              >
-                                ›
-                              </span>
-
-                              <span>{highlight}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </section>
-                    )}
-
-                    {/* =====================================
-                          TECH STACK
-                      ====================================== */}
-
-                    {item.techStack.length > 0 && (
-                      <section
-                        aria-label={`${item.role} technology stack`}
-                        className={`
-                            border-t
-                            pt-4
-
-                            ${
-                              isLight
-                                ? "border-slate-200"
-                                : "border-dark-border/60"
+                          <span
+                            aria-hidden="true"
+                            className={
+                              isLight ? "text-slate-400" : "text-slate-500"
                             }
-                          `}
-                      >
-                        <ul
-                          className="
-                              flex
-                              flex-wrap
-                              gap-2
-                            "
-                        >
-                          {item.techStack.map((tech) => (
-                            <li key={tech}>
-                              <span
-                                className={`
-                                      inline-flex
-                                      rounded-lg
-                                      border
-                                      px-2.5
-                                      py-1.5
-                                      font-mono
-                                      text-xs
-                                      font-medium
+                          >
+                            •
+                          </span>
 
-                                      ${
-                                        isLight
-                                          ? `
-                                            border-slate-200
-                                            bg-white
-                                            text-slate-700
-                                          `
-                                          : `
-                                            border-dark-border
-                                            bg-dark-border/50
-                                            text-slate-300
-                                          `
-                                      }
-                                    `}
+                          <span
+                            className={`text-sm ${
+                              isLight ? "text-slate-600" : "text-slate-400"
+                            }`}
+                          >
+                            <span aria-hidden="true">📍 </span>
+
+                            {item.location}
+                          </span>
+                        </div>
+
+                        {/* ACCORDION TRIGGER */}
+                        <button
+                          type="button"
+                          onClick={() => handleExperienceToggle(item.id)}
+                          aria-expanded={isExpanded}
+                          aria-controls={`${item.id}-details`}
+                          className={`flex min-h-10 w-full items-center justify-between gap-3 rounded-xl border px-3 py-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-blue ${
+                            isLight
+                              ? "border-slate-200 bg-white text-slate-700 hover:border-accent-blue/40 hover:bg-slate-50"
+                              : "border-dark-border bg-dark-border/30 text-slate-300 hover:border-accent-blue/40 hover:bg-dark-border/50"
+                          }`}
+                        >
+                          <span className="font-mono text-xs font-medium text-accent-blue">
+                            {isExpanded ? "// Hide Details" : "// View Details"}
+                          </span>
+
+                          <span
+                            aria-hidden="true"
+                            className={`font-mono text-xs text-accent-blue transition-transform ${
+                              isExpanded ? "rotate-180" : ""
+                            }`}
+                          >
+                            ▼
+                          </span>
+                        </button>
+                      </header>
+
+                      {/* ACCORDION CONTENT */}
+                      {isExpanded && (
+                        <div
+                          id={`${item.id}-details`}
+                          className={`mt-5 space-y-5 border-t pt-5 ${
+                            isLight
+                              ? "border-slate-200"
+                              : "border-dark-border/60"
+                          }`}
+                        >
+                          {/* DESCRIPTION */}
+                          <p
+                            className={`text-sm leading-7 ${
+                              isLight ? "text-slate-700" : "text-slate-300"
+                            }`}
+                          >
+                            {item.description}
+                          </p>
+
+                          {/* CONTRIBUTIONS */}
+                          {item.highlights && item.highlights.length > 0 && (
+                            <section
+                              aria-labelledby={`${item.id}-highlights`}
+                              className="space-y-2"
+                            >
+                              <h4
+                                id={`${item.id}-highlights`}
+                                className={`font-mono text-xs font-semibold uppercase tracking-wider ${
+                                  isLight ? "text-slate-600" : "text-slate-400"
+                                }`}
                               >
-                                {tech}
-                              </span>
-                            </li>
-                          ))}
-                        </ul>
-                      </section>
-                    )}
-                  </article>
-                </li>
-              ))}
+                                // Key Contributions & Impact
+                              </h4>
+
+                              <ul className="space-y-2">
+                                {item.highlights.map((highlight) => (
+                                  <li
+                                    key={highlight}
+                                    className={`flex items-start gap-2.5 text-sm leading-6 ${
+                                      isLight
+                                        ? "text-slate-700"
+                                        : "text-slate-300"
+                                    }`}
+                                  >
+                                    <span
+                                      aria-hidden="true"
+                                      className="mt-0.5 shrink-0 font-bold text-accent-blue"
+                                    >
+                                      ›
+                                    </span>
+
+                                    <span>{highlight}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </section>
+                          )}
+
+                          {/* TECH STACK */}
+                          {item.techStack.length > 0 && (
+                            <section
+                              aria-label={`${item.role} technology stack`}
+                              className={`border-t pt-4 ${
+                                isLight
+                                  ? "border-slate-200"
+                                  : "border-dark-border/60"
+                              }`}
+                            >
+                              <ul className="flex flex-wrap gap-2">
+                                {item.techStack.map((tech) => (
+                                  <li key={tech}>
+                                    <span
+                                      className={`inline-flex rounded-lg border px-2.5 py-1.5 font-mono text-xs font-medium ${
+                                        isLight
+                                          ? "border-slate-200 bg-white text-slate-700"
+                                          : "border-dark-border bg-dark-border/50 text-slate-300"
+                                      }`}
+                                    >
+                                      {tech}
+                                    </span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </section>
+                          )}
+                        </div>
+                      )}
+                    </article>
+                  </li>
+                );
+              })}
             </ol>
           )}
         </section>
