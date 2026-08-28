@@ -543,11 +543,11 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen }) => {
                 text-sm
                 leading-7
 
-                ${isLight ? "text-slate-700" : "text-slate-300"}
+                ${isLight ? "text-slate-800" : "text-slate-300"}
               `}
             >
-              {t.biography.map((paragraph) => (
-                <p key={paragraph}>{paragraph}</p>
+              {t.biography.map((paragraph, index) => (
+                <p key={index}>{paragraph}</p>
               ))}
             </div>
           </motion.section>

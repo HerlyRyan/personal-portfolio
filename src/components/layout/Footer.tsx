@@ -21,7 +21,6 @@ export const Footer: React.FC = () => {
         items-center
         justify-between
         gap-3
-        border-t
         px-4
         py-4
         font-mono
@@ -30,8 +29,6 @@ export const Footer: React.FC = () => {
 
         md:flex-row
         md:gap-4
-
-        ${isLight ? "border-slate-300" : "border-dark-border"}
       `}
     >
       {/* Visitor / Network Status */}

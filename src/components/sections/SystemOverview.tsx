@@ -1,100 +1,42 @@
 import React from "react";
 import { useSystem } from "../../context/SystemContext";
 
-const TECH_STACK = [
-  "Laravel",
-  "PHP",
-  "Flutter",
-  "Node.js",
-  "TypeScript",
-  "MySQL",
-] as const;
-
 export const SystemOverview: React.FC = () => {
-  const { theme, systemLang, lang } = useSystem();
+  const { theme, systemLang } = useSystem();
 
   const isLight = theme === "light";
-
-  const title = systemLang.systemOverview.title;
-
-  const highlightKeyword = lang === "EN" ? "precision" : "presisi";
-
-  const keywordIndex = title
-    .toLowerCase()
-    .indexOf(highlightKeyword.toLowerCase());
-
-  const hasKeyword = keywordIndex !== -1;
-
-  const titleBeforeKeyword = hasKeyword ? title.slice(0, keywordIndex) : title;
-
-  const highlightedTitle = hasKeyword
-    ? title.slice(keywordIndex, keywordIndex + highlightKeyword.length)
-    : "";
-
-  const titleAfterKeyword = hasKeyword
-    ? title.slice(keywordIndex + highlightKeyword.length)
-    : "";
+  const t = systemLang.systemOverview;
 
   return (
     <section
       aria-labelledby="system-overview-title"
       className={`
-        flex
-        flex-col
-        justify-between
+        lg:col-span-8
         rounded-2xl
         border
         p-6
-        transition-colors
-
         sm:p-8
-        md:p-10
-
-        lg:col-span-8
+        flex
+        flex-col
+        justify-between
+        transition-colors
 
         ${
           isLight
-            ? `
-              border-slate-200
-              bg-slate-50/70
-            `
-            : `
-              border-dark-border
-              bg-navy-base/30
-            `
+            ? "border-slate-200 bg-slate-50/70"
+            : "border-dark-border bg-navy-base/30"
         }
       `}
     >
       <div>
-        {/* =================================================
-            SECTION HEADER
-        ================================================== */}
-        <div
-          className="
-            mb-6
-            flex
-            flex-wrap
-            items-center
-            justify-between
-            gap-3
-          "
-        >
-          <span
-            className="
-              font-mono
-              text-xs
-              font-medium
-              uppercase
-              tracking-wider
-              text-accent-blue
-            "
-          >
-            {systemLang.systemOverview.tag}
+        {/* Header */}
+        <div className="mb-5 flex items-center justify-between gap-3">
+          <span className="font-mono text-xs font-semibold uppercase tracking-wider text-accent-blue">
+            {t.tag}
           </span>
 
           <span
             className={`
-              shrink-0
               rounded-lg
               border
               px-3
@@ -105,155 +47,132 @@ export const SystemOverview: React.FC = () => {
 
               ${
                 isLight
-                  ? `
-                    border-slate-200
-                    bg-white
-                    text-slate-600
-                  `
-                  : `
-                    border-dark-border
-                    bg-dark-border/50
-                    text-slate-300
-                  `
+                  ? "border-slate-200 bg-white text-slate-700"
+                  : "border-dark-border bg-dark-border/50 text-slate-300"
               }
             `}
           >
-            {systemLang.systemOverview.badge}
+            {t.badge}
           </span>
         </div>
 
-        {/* =================================================
-            MAIN HEADING
-        ================================================== */}
+        {/* Main headline */}
         <h1
           id="system-overview-title"
           className={`
-            mb-6
+            max-w-3xl
             text-3xl
             font-bold
             leading-tight
             tracking-tight
-            transition-colors
 
             md:text-4xl
 
             ${isLight ? "text-slate-950" : "text-slate-100"}
           `}
         >
-          {hasKeyword ? (
-            <>
-              {titleBeforeKeyword}
-
-              <span className="text-accent-blue">{highlightedTitle}</span>
-
-              {titleAfterKeyword}
-            </>
-          ) : (
-            title
-          )}
+          {t.title}
         </h1>
 
-        {/* =================================================
-            DESCRIPTION
-        ================================================== */}
+        {/* Description */}
         <p
           className={`
-            mb-8
+            mt-4
             max-w-3xl
             text-sm
             leading-7
-            transition-colors
 
             md:text-base
-            md:leading-8
 
-            ${isLight ? "text-slate-600" : "text-slate-300"}
+            ${isLight ? "text-slate-700" : "text-slate-300"}
           `}
         >
-          {systemLang.systemOverview.description}
+          {t.description}
         </p>
+
+        {/* Compact proof row */}
+        <dl
+          className="
+            mt-5
+            grid
+            grid-cols-1
+            gap-2.5
+
+            sm:grid-cols-3
+          "
+        >
+          {t.highlights.map((item) => (
+            <div
+              key={item.label}
+              className={`
+                rounded-xl
+                border
+                px-3.5
+                py-2.5
+
+                ${
+                  isLight
+                    ? "border-slate-200 bg-white"
+                    : "border-dark-border bg-dark-border/30"
+                }
+              `}
+            >
+              <dd className="font-mono text-base font-bold text-accent-blue">
+                {item.value}
+              </dd>
+
+              <dt
+                className={`
+                  mt-0.5
+                  text-xs
+                  font-medium
+
+                  ${isLight ? "text-slate-600" : "text-slate-400"}
+                `}
+              >
+                {item.label}
+              </dt>
+            </div>
+          ))}
+        </dl>
       </div>
 
-      {/* =================================================
-          TECHNOLOGY STACK
-      ================================================== */}
+      {/* Compact focus / stack row */}
       <div
         className={`
+          mt-5
           flex
-          flex-col
-          gap-4
+          flex-wrap
+          items-center
+          gap-2
           border-t
-          pt-6
-          transition-colors
-
-          sm:flex-row
-          sm:items-end
-          sm:justify-between
+          pt-4
 
           ${isLight ? "border-slate-200" : "border-dark-border/60"}
         `}
       >
-        <div>
-          <span className="sr-only">Technology stack</span>
+        {t.focusAreas.map((focus) => (
+          <span
+            key={focus}
+            className={`
+              rounded-lg
+              border
+              px-3
+              py-1.5
+              font-mono
+              text-xs
+              font-medium
 
-          <ul
-            aria-label="Technology stack"
-            className="
-              flex
-              flex-wrap
-              gap-2
-            "
+              ${
+                isLight
+                  ? "border-slate-200 bg-white text-slate-700"
+                  : "border-dark-border bg-dark-border/40 text-slate-300"
+              }
+            `}
           >
-            {TECH_STACK.map((tech) => (
-              <li key={tech}>
-                <span
-                  className={`
-                    inline-flex
-                    items-center
-                    rounded-xl
-                    border
-                    px-3.5
-                    py-1.5
-                    font-mono
-                    text-xs
-                    font-medium
-                    transition-colors
-
-                    ${
-                      isLight
-                        ? `
-                          border-slate-200
-                          bg-white
-                          text-slate-700
-                          shadow-sm
-                        `
-                        : `
-                          border-dark-border
-                          bg-dark-border/40
-                          text-slate-300
-                        `
-                    }
-                  `}
-                >
-                  {tech}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* System connection status */}
-        <span
-          className="
-            shrink-0
-            font-mono
-            text-xs
-            font-medium
-            text-accent-blue
-          "
-        >
-          {systemLang.systemOverview.secureConnection}
-        </span>
+            {focus}
+          </span>
+        ))}
       </div>
     </section>
   );

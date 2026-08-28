@@ -281,7 +281,7 @@ export const ExperienceModal: React.FC<ExperienceModalProps> = ({ isOpen }) => {
                           ? `
                             border-accent-blue
                             bg-accent-blue
-                            text-white
+                            text-white!
                           `
                           : isLight
                             ? `
@@ -411,7 +411,7 @@ export const ExperienceModal: React.FC<ExperienceModalProps> = ({ isOpen }) => {
                         ? `
                           border-accent-blue
                           bg-accent-blue
-                          text-white
+                          text-white!
                         `
                         : isLight
                           ? `

@@ -151,7 +151,7 @@ export const projectsEn: ProjectsLocale = {
       ],
       githubUrl: "https://github.com/HerlyRyan/POS-Thesis-App",
       liveUrl: "https://inventory-system-demo.vercel.app",
-      coverImage: "/images/projects/test.png",
+      coverImage: "/images/projects/galam-sani/cover.webp",
       screenshots: ["/images/projects/galam-sani/ss-login-page.jpeg"],
     },
     {

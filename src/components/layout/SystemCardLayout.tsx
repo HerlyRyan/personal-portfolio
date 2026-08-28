@@ -132,6 +132,7 @@ export const SystemCardLayout: React.FC = () => {
       <div
         className="
           mb-4
+          mt-3
           flex
           min-w-0
           w-full
@@ -140,6 +141,7 @@ export const SystemCardLayout: React.FC = () => {
           justify-between
           gap-2
 
+          sm:mt-4
           sm:gap-3
         "
       >

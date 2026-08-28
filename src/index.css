@@ -81,10 +81,6 @@
     font-weight: 600;
   }
 
-  p {
-    color: var(--color-text-body);
-  }
-
   /*
     Global keyboard focus fallback.
 
