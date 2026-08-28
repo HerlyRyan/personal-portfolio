@@ -14,7 +14,8 @@ const FOCUSABLE_ELEMENTS = [
 ].join(",");
 
 export const ConfirmExternalModal: React.FC = () => {
-  const { confirmUrl, clearExternalUrl, theme, systemLang } = useSystem();
+  const { confirmUrl, clearExternalUrl, theme, systemLang, activeModal } =
+    useSystem();
 
   const isLight = theme === "light";
   const shouldReduceMotion = useReducedMotion();
@@ -47,11 +48,19 @@ export const ConfirmExternalModal: React.FC = () => {
     }
 
     /*
-     * Jangan biarkan body ikut scroll.
+     * Jika confirmation dibuka dari ProjectsModal,
+     * body sebenarnya sudah dikunci oleh ModalContainer.
+     *
+     * Confirmation hanya perlu mengambil ownership body
+     * jika tidak ada modal utama yang sedang aktif.
      */
+    const shouldLockBody = activeModal === null;
+
     const previousOverflow = document.body.style.overflow;
 
-    document.body.style.overflow = "hidden";
+    if (shouldLockBody) {
+      document.body.style.overflow = "hidden";
+    }
 
     /*
      * Default focus diarahkan ke Cancel.
@@ -114,7 +123,9 @@ export const ConfirmExternalModal: React.FC = () => {
     return () => {
       cancelAnimationFrame(focusFrame);
 
-      document.body.style.overflow = previousOverflow;
+      if (shouldLockBody) {
+        document.body.style.overflow = previousOverflow;
+      }
 
       document.removeEventListener("keydown", handleKeyDown);
 
@@ -126,7 +137,7 @@ export const ConfirmExternalModal: React.FC = () => {
         previouslyFocusedElementRef.current = null;
       });
     };
-  }, [confirmUrl, clearExternalUrl]);
+  }, [confirmUrl, clearExternalUrl, activeModal]);
 
   /*
    * =====================================================

@@ -4,11 +4,8 @@ import { useSystem } from "../../context/SystemContext";
 
 interface ModalContainerProps {
   children: React.ReactNode;
-
   onClose: () => void;
-
   titleId: string;
-
   descriptionId?: string;
 }
 
@@ -33,16 +30,27 @@ export const ModalContainer: React.FC<ModalContainerProps> = ({
 
   const dialogRef = useRef<HTMLDivElement>(null);
 
-  /**
+  /*
+   * Simpan callback terbaru tanpa membuat
+   * modal lifecycle effect restart.
+   */
+  const onCloseRef = useRef(onClose);
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
+  /*
    * =====================================================
-   * MODAL ACCESSIBILITY
+   * MODAL LIFECYCLE
    * =====================================================
    *
-   * Responsibilities:
-   * - lock body scroll
-   * - move focus into modal
-   * - trap keyboard focus
-   * - close using Escape
+   * Hanya berjalan ketika ModalContainer:
+   *
+   * mounted   -> lock body
+   * unmounted -> restore body
+   *
+   * Tidak restart hanya karena context rerender.
    */
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -58,14 +66,6 @@ export const ModalContainer: React.FC<ModalContainerProps> = ({
     const getFocusableElements = () =>
       Array.from(dialog.querySelectorAll<HTMLElement>(FOCUSABLE_ELEMENTS));
 
-    /*
-     * Tunggu DOM benar-benar selesai render,
-     * lalu pindahkan focus ke interactive
-     * element pertama.
-     *
-     * Pada struktur modal kita biasanya
-     * elemen pertama adalah tombol Close.
-     */
     const focusFrame = requestAnimationFrame(() => {
       const focusableElements = getFocusableElements();
 
@@ -77,18 +77,14 @@ export const ModalContainer: React.FC<ModalContainerProps> = ({
     });
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      /*
-       * Escape
-       */
       if (event.key === "Escape") {
         event.preventDefault();
-        onClose();
+
+        onCloseRef.current();
+
         return;
       }
 
-      /*
-       * Focus Trap
-       */
       if (event.key !== "Tab") {
         return;
       }
@@ -98,6 +94,7 @@ export const ModalContainer: React.FC<ModalContainerProps> = ({
       if (focusableElements.length === 0) {
         event.preventDefault();
         dialog.focus();
+
         return;
       }
 
@@ -123,22 +120,15 @@ export const ModalContainer: React.FC<ModalContainerProps> = ({
     return () => {
       cancelAnimationFrame(focusFrame);
 
-      document.body.style.overflow = previousOverflow;
-
       document.removeEventListener("keydown", handleKeyDown);
+
+      document.body.style.overflow = previousOverflow;
     };
-  }, [onClose]);
+  }, []);
 
   const handleBackdropClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    /*
-     * Hanya close jika user benar-benar
-     * mengklik backdrop.
-     *
-     * Click dari child modal tidak dianggap
-     * sebagai backdrop click.
-     */
     if (event.target === event.currentTarget) {
-      onClose();
+      onCloseRef.current();
     }
   };
 
@@ -148,11 +138,15 @@ export const ModalContainer: React.FC<ModalContainerProps> = ({
         fixed
         inset-0
         z-50
+
         flex
         items-center
         justify-center
+
         bg-black/80
+
         p-3
+
         backdrop-blur-sm
 
         sm:p-4
@@ -168,15 +162,19 @@ export const ModalContainer: React.FC<ModalContainerProps> = ({
         tabIndex={-1}
         className={`
           relative
+
           flex
           max-h-[92dvh]
           w-full
           max-w-3xl
           flex-col
+
           overflow-hidden
+
           rounded-2xl
           border
           shadow-2xl
+
           transition-colors
 
           sm:rounded-3xl
