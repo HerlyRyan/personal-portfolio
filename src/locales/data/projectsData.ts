@@ -1,5 +1,6 @@
 export interface Project {
   id: string;
+  shortTitle: string;
   title: string;
   category: string;
   role?: string;
@@ -27,6 +28,8 @@ export interface ProjectsLocale {
   startLabel: string;
   endLabel: string;
   repoButton: string;
+  navigatorLable: string;
+  navigatorHint: string;
   projectsList: Project[];
 }
 
@@ -43,9 +46,12 @@ export const projectsId: ProjectsLocale = {
   startLabel: "Start",
   endLabel: "End",
   repoButton: "Repository Code ↗",
+  navigatorLable: "Navigasi Project",
+  navigatorHint: "Pilih project yang ingin ditinjau",
   projectsList: [
     {
       id: "galam-sani-pos",
+      shortTitle: "POS System Galam Sani",
       title:
         "PERANCANGAN DAN PENGEMBANGAN APLIKASI POINT OF SALES BERBASIS WEB DI GALAM SANI",
       category: "Full-Stack System",
@@ -78,31 +84,6 @@ export const projectsId: ProjectsLocale = {
       coverImage: "/images/projects/test.png",
       screenshots: ["/images/projects/galam-sani/ss-login-page.jpeg"],
     },
-    {
-      id: "travel-app",
-      title: "Travel Schedule & Charter Platform",
-      category: "Web Application",
-      role: "Frontend Developer",
-      metrics: "Meningkatkan efisiensi penjadwalan armada dan supir hingga 30%",
-      description:
-        "Platform manajemen jadwal perjalanan, penyewaan kendaraan, dan layanan carter wisata.",
-      longDescription:
-        "Solusi digital untuk manajemen operasional travel harian, mencakup penjadwalan armada kendaraan, pengelolaan data supir, rute perjalanan, serta pembuatan laporan data travel yang bersih dan terstruktur.",
-      keyFeatures: [
-        "Manajemen jadwal armada & rute travel secara terpusat",
-        "Sistem pencatatan data supir dan ketersediaan unit kendaraan",
-        "Tampilan antarmuka responsif berbasis Card & Grid modern",
-        "Modul laporan data travel khusus tanpa tombol modifikasi (Read-Only)",
-      ],
-      techStack: ["React", "Vite", "Tailwind CSS", "TypeScript"],
-      githubUrl: "https://github.com/USERNAME/travel-app",
-      liveUrl: "https://travel-app-demo.vercel.app",
-      coverImage:
-        "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=800&q=80",
-      screenshots: [
-        "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80",
-      ],
-    },
   ],
 };
 
@@ -119,9 +100,12 @@ export const projectsEn: ProjectsLocale = {
   startLabel: "Start",
   endLabel: "End",
   repoButton: "Repository Code ↗",
+  navigatorLable: "Project Navigator",
+  navigatorHint: "Quickly select a project to review",
   projectsList: [
     {
       id: "galam-sani-pos",
+      shortTitle: "POS System Galam Sani",
       title:
         "DESIGN AND DEVELOPMENT OF A POINT OF SALES WEB APPLICATION AT GALAM SANI",
       category: "Full-Stack System",
@@ -153,31 +137,6 @@ export const projectsEn: ProjectsLocale = {
       liveUrl: "https://inventory-system-demo.vercel.app",
       coverImage: "/images/projects/galam-sani/cover.webp",
       screenshots: ["/images/projects/galam-sani/ss-login-page.jpeg"],
-    },
-    {
-      id: "travel-app",
-      title: "Travel Schedule & Charter Platform",
-      category: "Web Application",
-      role: "Frontend Developer",
-      metrics: "Increased fleet and driver scheduling efficiency by up to 30%",
-      description:
-        "Travel schedule management platform, vehicle rental, and tour charter services.",
-      longDescription:
-        "Digital solution for daily travel operational management, covering vehicle fleet scheduling, driver data management, travel routes, and clean, structured travel data reporting.",
-      keyFeatures: [
-        "Centralized fleet schedule & travel route management",
-        "Driver data and vehicle unit availability tracking system",
-        "Modern Card & Grid responsive user interface",
-        "Read-only dedicated travel data reporting module",
-      ],
-      techStack: ["React", "Vite", "Tailwind CSS", "TypeScript"],
-      githubUrl: "https://github.com/USERNAME/travel-app",
-      liveUrl: "https://travel-app-demo.vercel.app",
-      coverImage:
-        "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=800&q=80",
-      screenshots: [
-        "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80",
-      ],
     },
   ],
 };
