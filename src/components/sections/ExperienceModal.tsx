@@ -33,6 +33,8 @@ export const ExperienceModal: React.FC<ExperienceModalProps> = ({ isOpen }) => {
     string | null
   >(null);
 
+  const [isTechMenuOpen, setIsTechMenuOpen] = useState(false);
+
   /*
    * =====================================================
    * DATA DERIVATION
@@ -383,69 +385,250 @@ export const ExperienceModal: React.FC<ExperienceModalProps> = ({ isOpen }) => {
             )}
           </div>
 
-          <div
-            role="group"
-            aria-label="Filter experiences by technology"
-            className="
-              flex
-              flex-wrap
-              gap-2
-            "
-          >
-            {allTechs.map((tech) => {
-              const isSelected = selectedTech === tech;
+          <div className="relative">
+            <label htmlFor="experience-tech-select" className="sr-only">
+              Filter experiences by technology
+            </label>
 
-              return (
-                <button
-                  key={tech}
-                  type="button"
-                  onClick={() => setSelectedTech(isSelected ? null : tech)}
-                  aria-pressed={isSelected}
-                  className={`
-                    min-h-9
-                    rounded-xl
-                    border
-                    px-3
-                    py-1.5
-                    font-mono
-                    text-xs
-                    font-medium
-                    transition-colors
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setIsTechMenuOpen((previous) => !previous)}
+                aria-haspopup="listbox"
+                aria-expanded={isTechMenuOpen}
+                aria-controls="experience-tech-list"
+                className={`
+      flex
+      min-h-11
+      w-full
+      items-center
+      justify-between
+      gap-3
+      rounded-xl
+      border
+      px-3
+      py-2.5
+      text-left
+      transition-colors
 
-                    focus-visible:outline-none
-                    focus-visible:ring-2
-                    focus-visible:ring-accent-blue
+      focus-visible:outline-none
+      focus-visible:ring-2
+      focus-visible:ring-accent-blue
 
-                    ${
-                      isSelected
-                        ? `
-                          border-accent-blue
-                          bg-accent-blue
-                          text-white!
-                        `
+      ${
+        isLight
+          ? `
+            border-slate-200
+            bg-slate-100
+            text-slate-700
+
+            hover:border-accent-blue/40
+          `
+          : `
+            border-dark-border
+            bg-dark-border/40
+            text-slate-300
+
+            hover:border-accent-blue/40
+          `
+      }
+    `}
+              >
+                <span className="flex min-w-0 items-center gap-2">
+                  <span className="shrink-0 font-mono text-xs font-semibold text-accent-blue">
+                    {">"}
+                  </span>
+
+                  <span
+                    className={`truncate font-mono text-sm font-medium ${
+                      selectedTech
+                        ? isLight
+                          ? "text-slate-800"
+                          : "text-slate-200"
                         : isLight
-                          ? `
-                            border-slate-200
-                            bg-slate-100
-                            text-slate-700
+                          ? "text-slate-500"
+                          : "text-slate-400"
+                    }`}
+                  >
+                    {selectedTech ?? "All Technologies"}
+                  </span>
+                </span>
 
-                            hover:bg-slate-200
-                          `
-                          : `
-                            border-dark-border
-                            bg-dark-border/40
-                            text-slate-300
-
-                            hover:bg-dark-border
-                            hover:text-white
-                          `
-                    }
-                  `}
+                <span
+                  aria-hidden="true"
+                  className={`shrink-0 font-mono text-xs text-accent-blue transition-transform ${
+                    isTechMenuOpen ? "rotate-180" : ""
+                  }`}
                 >
-                  {tech}
-                </button>
-              );
-            })}
+                  ▼
+                </span>
+              </button>
+
+              {isTechMenuOpen && (
+                <div
+                  id="experience-tech-list"
+                  role="listbox"
+                  aria-label="Filter experiences by technology"
+                  className={`
+        absolute
+        left-0
+        right-0
+        top-full
+        z-40
+        mt-2
+        overflow-hidden
+        rounded-xl
+        border
+        shadow-2xl
+
+        ${
+          isLight
+            ? `
+              border-slate-200
+              bg-white
+              shadow-slate-300/40
+            `
+            : `
+              border-dark-border
+              bg-dark-card
+              shadow-black/50
+            `
+        }
+      `}
+                >
+                  <div
+                    className="
+          custom-scrollbar
+          max-h-64
+          overflow-y-auto
+          overscroll-contain
+          p-1.5
+        "
+                  >
+                    <button
+                      type="button"
+                      role="option"
+                      aria-selected={selectedTech === null}
+                      onClick={() => {
+                        setSelectedTech(null);
+                        setIsTechMenuOpen(false);
+                      }}
+                      className={`
+            flex
+            min-h-10
+            w-full
+            items-center
+            justify-between
+            gap-3
+            rounded-lg
+            px-3
+            py-2
+            text-left
+            transition-colors
+
+            focus-visible:outline-none
+            focus-visible:ring-2
+            focus-visible:ring-inset
+            focus-visible:ring-accent-blue
+
+            ${
+              selectedTech === null
+                ? "bg-accent-blue/10 text-accent-blue"
+                : isLight
+                  ? "text-slate-700 hover:bg-slate-100"
+                  : "text-slate-300 hover:bg-dark-border/50 hover:text-white"
+            }
+          `}
+                    >
+                      <span className="font-mono text-sm font-medium">
+                        All Technologies
+                      </span>
+
+                      {selectedTech === null && (
+                        <span
+                          aria-hidden="true"
+                          className="shrink-0 text-sm font-bold text-accent-blue"
+                        >
+                          ✓
+                        </span>
+                      )}
+                    </button>
+
+                    {allTechs.map((tech) => {
+                      const isSelected = selectedTech === tech;
+
+                      return (
+                        <button
+                          key={tech}
+                          type="button"
+                          role="option"
+                          aria-selected={isSelected}
+                          onClick={() => {
+                            setSelectedTech(tech);
+                            setIsTechMenuOpen(false);
+                          }}
+                          className={`
+                flex
+                min-h-10
+                w-full
+                items-center
+                justify-between
+                gap-3
+                rounded-lg
+                px-3
+                py-2
+                text-left
+                transition-colors
+
+                focus-visible:outline-none
+                focus-visible:ring-2
+                focus-visible:ring-inset
+                focus-visible:ring-accent-blue
+
+                ${
+                  isSelected
+                    ? "bg-accent-blue/10 text-accent-blue"
+                    : isLight
+                      ? "text-slate-700 hover:bg-slate-100"
+                      : "text-slate-300 hover:bg-dark-border/50 hover:text-white"
+                }
+              `}
+                        >
+                          <span className="truncate font-mono text-sm font-medium">
+                            {tech}
+                          </span>
+
+                          {isSelected && (
+                            <span
+                              aria-hidden="true"
+                              className="shrink-0 text-sm font-bold text-accent-blue"
+                            >
+                              ✓
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <span
+              aria-hidden="true"
+              className="
+      pointer-events-none
+      absolute
+      right-3
+      top-1/2
+      -translate-y-1/2
+      font-mono
+      text-xs
+      text-accent-blue
+    "
+            >
+              ▼
+            </span>
           </div>
         </section>
 
