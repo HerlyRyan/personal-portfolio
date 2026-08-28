@@ -1,4 +1,4 @@
-import React, { useId, useRef, useState } from "react";
+import React, { useEffect, useId, useRef, useState } from "react";
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 
@@ -36,6 +36,8 @@ export const ProjectsModal: React.FC<ProjectsModalProps> = ({ isOpen }) => {
 
   const [mediaIndex, setMediaIndex] = useState(0);
 
+  const [isProjectMenuOpen, setIsProjectMenuOpen] = useState(false);
+
   /*
    * =====================================================
    * CAROUSEL REF
@@ -43,13 +45,8 @@ export const ProjectsModal: React.FC<ProjectsModalProps> = ({ isOpen }) => {
    */
 
   const mediaContainerRef = useRef<HTMLDivElement>(null);
-
-  /*
-   * Jangan render modal ketika tidak aktif.
-   */
-  if (!isOpen) {
-    return null;
-  }
+  const modalBodyRef = useRef<HTMLDivElement>(null);
+  const projectMenuRef = useRef<HTMLDivElement>(null);
 
   /*
    * =====================================================
@@ -77,7 +74,6 @@ export const ProjectsModal: React.FC<ProjectsModalProps> = ({ isOpen }) => {
 
   const mediaList = [
     ...(currentProject.coverImage ? [currentProject.coverImage] : []),
-
     ...(currentProject.screenshots ?? []),
   ];
 
@@ -93,6 +89,24 @@ export const ProjectsModal: React.FC<ProjectsModalProps> = ({ isOpen }) => {
     closeModal("~/sys/home");
   };
 
+  // Select a project and reset the media carousel.
+  const selectProject = (index: number) => {
+    if (index < 0 || index >= totalProjects) {
+      return;
+    }
+
+    setCurrentIndex(index);
+    setMediaIndex(0);
+
+    // Return the modal body to the beginning after changing projects.
+    requestAnimationFrame(() => {
+      modalBodyRef.current?.scrollTo({
+        top: 0,
+        behavior: shouldReduceMotion ? "auto" : "smooth",
+      });
+    });
+  };
+
   /*
    * =====================================================
    * PROJECT NAVIGATION
@@ -104,9 +118,7 @@ export const ProjectsModal: React.FC<ProjectsModalProps> = ({ isOpen }) => {
       return;
     }
 
-    setCurrentIndex((previousIndex) => previousIndex + 1);
-
-    setMediaIndex(0);
+    selectProject(currentIndex + 1);
   };
 
   const handlePrevProject = () => {
@@ -114,18 +126,15 @@ export const ProjectsModal: React.FC<ProjectsModalProps> = ({ isOpen }) => {
       return;
     }
 
-    setCurrentIndex((previousIndex) => previousIndex - 1);
-
-    setMediaIndex(0);
+    selectProject(currentIndex - 1);
   };
 
   const handleProjectJump = (index: number) => {
-    if (index < 0 || index >= totalProjects || index === currentIndex) {
+    if (index === currentIndex) {
       return;
     }
 
-    setCurrentIndex(index);
-    setMediaIndex(0);
+    selectProject(index);
   };
 
   /*
@@ -179,6 +188,37 @@ export const ProjectsModal: React.FC<ProjectsModalProps> = ({ isOpen }) => {
     scrollToMedia(index);
   };
 
+  useEffect(() => {
+    if (!isProjectMenuOpen) {
+      return;
+    }
+
+    const handlePointerDown = (event: PointerEvent) => {
+      const menu = projectMenuRef.current;
+
+      if (!menu) {
+        return;
+      }
+
+      if (!menu.contains(event.target as Node)) {
+        setIsProjectMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+    };
+  }, [isProjectMenuOpen]);
+
+  /*
+   * Jangan render modal ketika tidak aktif.
+   */
+  if (!isOpen) {
+    return null;
+  }
+
   return (
     <ModalContainer onClose={handleClose} titleId={titleId}>
       {/* =================================================
@@ -186,6 +226,453 @@ export const ProjectsModal: React.FC<ProjectsModalProps> = ({ isOpen }) => {
       ================================================== */}
 
       <ModalHeader title={t.title} titleId={titleId} onClose={handleClose} />
+
+      {/* ================================================
+          PROJECT NAVIGATOR
+      ================================================= */}
+
+      <div
+        className={`
+      shrink-0
+      border-b
+      px-4
+      py-3
+
+      sm:px-6
+
+      ${
+        isLight
+          ? `
+            border-slate-200
+            bg-white
+          `
+          : `
+            border-dark-border
+            bg-dark-card
+          `
+      }
+    `}
+      >
+        <div
+          className="
+        flex
+        flex-col
+        gap-2
+
+        sm:flex-row
+        sm:items-center
+        sm:justify-between
+        sm:gap-4
+      "
+        >
+          {/* Navigator information */}
+          <div className="min-w-0">
+            <div
+              className="
+            flex
+            items-center
+            gap-2
+          "
+            >
+              <span
+                className="
+              font-mono
+              text-xs
+              font-semibold
+              uppercase
+              tracking-wider
+              text-accent-blue
+            "
+              >
+                // {t.navigatorLable}
+              </span>
+
+              <span
+                className={`
+              rounded-md
+              px-2
+              py-0.5
+              font-mono
+              text-xs
+              font-medium
+
+              ${
+                isLight
+                  ? `
+                    bg-slate-100
+                    text-slate-600
+                  `
+                  : `
+                    bg-dark-border/50
+                    text-slate-400
+                  `
+              }
+            `}
+              >
+                {String(currentIndex + 1).padStart(2, "0")}
+                {" / "}
+                {String(totalProjects).padStart(2, "0")}
+              </span>
+            </div>
+
+            <p
+              className={`
+            mt-1
+            hidden
+            text-xs
+
+            md:block
+
+            ${isLight ? "text-slate-600" : "text-slate-400"}
+          `}
+            >
+              {t.navigatorHint}
+            </p>
+          </div>
+
+          {/* Native select */}
+          <div
+            className="
+          relative
+          w-full
+
+          sm:max-w-sm
+        "
+          >
+            <label htmlFor="project-selector" className="sr-only">
+              {t.navigatorLable}
+            </label>
+
+            <div
+              ref={projectMenuRef}
+              className="
+    relative
+    w-full
+
+    sm:max-w-sm
+  "
+            >
+              {/* =============================================
+      DROPDOWN TRIGGER
+  ============================================== */}
+
+              <button
+                type="button"
+                onClick={() => setIsProjectMenuOpen((previous) => !previous)}
+                aria-haspopup="listbox"
+                aria-expanded={isProjectMenuOpen}
+                aria-controls="project-selector-list"
+                className={`
+      flex
+      min-h-11
+      w-full
+      items-center
+      justify-between
+      gap-3
+
+      rounded-xl
+      border
+
+      px-3
+      py-2.5
+
+      text-left
+
+      transition-colors
+
+      focus-visible:outline-none
+      focus-visible:ring-2
+      focus-visible:ring-accent-blue
+
+      ${
+        isLight
+          ? `
+            border-slate-300
+            bg-slate-50
+            text-slate-800
+
+            hover:border-accent-blue/50
+          `
+          : `
+            border-dark-border
+            bg-navy-base/70
+            text-slate-200
+
+            hover:border-accent-blue/50
+          `
+      }
+    `}
+              >
+                <span
+                  className="
+        flex
+        min-w-0
+        items-center
+        gap-2
+      "
+                >
+                  {/* Project number */}
+                  <span
+                    className="
+          shrink-0
+          font-mono
+          text-xs
+          font-semibold
+          text-accent-blue
+        "
+                  >
+                    {String(currentIndex + 1).padStart(2, "0")}
+                  </span>
+
+                  <span
+                    aria-hidden="true"
+                    className={`
+          shrink-0
+
+          ${isLight ? "text-slate-400" : "text-slate-600"}
+        `}
+                  >
+                    /
+                  </span>
+
+                  {/* Current project */}
+                  <span
+                    className="
+          truncate
+          font-mono
+          text-xs
+          font-medium
+        "
+                  >
+                    {currentProject.shortTitle}
+                  </span>
+                </span>
+
+                {/* Arrow */}
+                <span
+                  aria-hidden="true"
+                  className={`
+        shrink-0
+        font-mono
+        text-xs
+        text-accent-blue
+        transition-transform
+
+        ${isProjectMenuOpen ? "rotate-180" : ""}
+      `}
+                >
+                  ▼
+                </span>
+              </button>
+
+              {/* =============================================
+      DROPDOWN LIST
+  ============================================== */}
+
+              {isProjectMenuOpen && (
+                <div
+                  id="project-selector-list"
+                  role="listbox"
+                  aria-label={t.navigatorLable}
+                  className={`
+        absolute
+        right-0
+        top-full
+        z-40
+
+        mt-2
+
+        w-full
+
+        overflow-hidden
+
+        rounded-xl
+        border
+
+        shadow-2xl
+
+        ${
+          isLight
+            ? `
+              border-slate-200
+              bg-white
+              shadow-slate-300/40
+            `
+            : `
+              border-dark-border
+              bg-dark-card
+              shadow-black/50
+            `
+        }
+      `}
+                >
+                  {/* Scrollable project list */}
+                  <div
+                    className="
+          custom-scrollbar
+
+          max-h-64
+          overflow-y-auto
+          overscroll-contain
+
+          touch-pan-y
+
+          p-1.5
+
+          [-webkit-overflow-scrolling:touch]
+        "
+                  >
+                    {t.projectsList.map((project, index) => {
+                      const isSelected = currentIndex === index;
+
+                      return (
+                        <button
+                          key={project.id}
+                          type="button"
+                          role="option"
+                          aria-selected={isSelected}
+                          onClick={() => {
+                            handleProjectJump(index);
+
+                            setIsProjectMenuOpen(false);
+                          }}
+                          className={`
+                  flex
+                  min-h-11
+                  w-full
+                  items-center
+                  gap-3
+
+                  rounded-lg
+
+                  px-3
+                  py-2.5
+
+                  text-left
+
+                  transition-colors
+
+                  focus-visible:outline-none
+                  focus-visible:ring-2
+                  focus-visible:ring-inset
+                  focus-visible:ring-accent-blue
+
+                  ${
+                    isSelected
+                      ? `
+                        bg-accent-blue/10
+                        text-accent-blue
+                      `
+                      : isLight
+                        ? `
+                          text-slate-700
+
+                          hover:bg-slate-100
+                        `
+                        : `
+                          text-slate-300
+
+                          hover:bg-dark-border/50
+                          hover:text-white
+                        `
+                  }
+                `}
+                        >
+                          {/* Number */}
+                          <span
+                            className="
+                    w-7
+                    shrink-0
+                    font-mono
+                    text-xs
+                    font-semibold
+                    text-accent-blue
+                  "
+                          >
+                            {String(index + 1).padStart(2, "0")}
+                          </span>
+
+                          {/* Project info */}
+                          <span
+                            className="
+                    min-w-0
+                    flex-1
+                  "
+                          >
+                            <span
+                              className="
+                      block
+                      truncate
+                      text-sm
+                      font-medium
+                    "
+                            >
+                              {project.shortTitle}
+                            </span>
+
+                            <span
+                              className={`
+                      mt-0.5
+                      block
+                      truncate
+                      font-mono
+                      text-xs
+
+                      ${
+                        isSelected
+                          ? "text-accent-blue/80"
+                          : isLight
+                            ? "text-slate-500"
+                            : "text-slate-500"
+                      }
+                    `}
+                            >
+                              {project.category}
+                            </span>
+                          </span>
+
+                          {/* Selected indicator */}
+                          {isSelected && (
+                            <span
+                              aria-hidden="true"
+                              className="
+                      shrink-0
+                      text-sm
+                      font-bold
+                      text-accent-blue
+                    "
+                            >
+                              ✓
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Custom arrow */}
+            <span
+              aria-hidden="true"
+              className="
+            pointer-events-none
+            absolute
+            right-3
+            top-1/2
+            -translate-y-1/2
+
+            font-mono
+            text-xs
+            text-accent-blue
+          "
+            >
+              ▼
+            </span>
+          </div>
+        </div>
+      </div>
 
       {/* =================================================
           SCREEN READER STATUS
@@ -208,12 +695,20 @@ export const ProjectsModal: React.FC<ProjectsModalProps> = ({ isOpen }) => {
       ================================================== */}
 
       <div
+        ref={modalBodyRef}
         className="
           custom-scrollbar
+
           min-h-0
           flex-1
+
           overflow-y-auto
+          overscroll-y-contain
+          touch-pan-y
+
           p-4
+
+          [-webkit-overflow-scrolling:touch]
 
           sm:p-6
         "
@@ -1107,63 +1602,6 @@ export const ProjectsModal: React.FC<ProjectsModalProps> = ({ isOpen }) => {
               </span>
             </button>
           </div>
-
-          {/* =============================================
-              PROJECT DOTS
-          ============================================== */}
-
-          {totalProjects > 1 && (
-            <div
-              role="group"
-              aria-label="Project navigation"
-              className="
-                hidden
-                items-center
-                gap-0.5
-
-                lg:flex
-              "
-            >
-              {t.projectsList.map((project, index) => (
-                <button
-                  key={project.id}
-                  type="button"
-                  onClick={() => handleProjectJump(index)}
-                  aria-label={`Open project ${index + 1}: ${project.title}`}
-                  aria-current={currentIndex === index ? "true" : undefined}
-                  className="
-                      flex
-                      h-10
-                      w-10
-                      items-center
-                      justify-center
-                      rounded-lg
-
-                      focus-visible:outline-none
-                      focus-visible:ring-2
-                      focus-visible:ring-accent-blue
-                    "
-                >
-                  <span
-                    aria-hidden="true"
-                    className={`
-                        h-2
-                        rounded-full
-                        transition-all
-
-                        ${
-                          currentIndex === index
-                            ? "w-6 bg-accent-blue"
-                            : isLight
-                              ? "w-2 bg-slate-300"
-                              : "w-2 bg-slate-600"
-                        }
-                      `}
-                  />
-                </button>
-              ))}
-            </div>
-          )}
         </div>
 
         {/* ===============================================
