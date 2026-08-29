@@ -652,24 +652,6 @@ export const ProjectsModal: React.FC<ProjectsModalProps> = ({ isOpen }) => {
                 </div>
               )}
             </div>
-
-            {/* Custom arrow */}
-            <span
-              aria-hidden="true"
-              className="
-            pointer-events-none
-            absolute
-            right-3
-            top-1/2
-            -translate-y-1/2
-
-            font-mono
-            text-xs
-            text-accent-blue
-          "
-            >
-              ▼
-            </span>
           </div>
         </div>
       </div>

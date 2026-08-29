@@ -613,22 +613,6 @@ export const ExperienceModal: React.FC<ExperienceModalProps> = ({ isOpen }) => {
                 </div>
               )}
             </div>
-
-            <span
-              aria-hidden="true"
-              className="
-      pointer-events-none
-      absolute
-      right-3
-      top-1/2
-      -translate-y-1/2
-      font-mono
-      text-xs
-      text-accent-blue
-    "
-            >
-              ▼
-            </span>
           </div>
         </section>
 
