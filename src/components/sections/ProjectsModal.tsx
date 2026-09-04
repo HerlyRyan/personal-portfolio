@@ -38,6 +38,8 @@ export const ProjectsModal: React.FC<ProjectsModalProps> = ({ isOpen }) => {
 
   const [isProjectMenuOpen, setIsProjectMenuOpen] = useState(false);
 
+  const [loadedImages, setLoadedImages] = useState<Record<string, boolean>>({});
+
   /*
    * =====================================================
    * CAROUSEL REF
@@ -202,6 +204,20 @@ export const ProjectsModal: React.FC<ProjectsModalProps> = ({ isOpen }) => {
       document.removeEventListener("pointerdown", handlePointerDown);
     };
   }, [isProjectMenuOpen]);
+
+  // Handle project images loading
+  const handleImageLoaded = (url: string) => {
+    setLoadedImages((previous) => {
+      if (previous[url]) {
+        return previous;
+      }
+
+      return {
+        ...previous,
+        [url]: true,
+      };
+    });
+  };
 
   /*
    * Jangan render modal ketika tidak aktif.
@@ -941,18 +957,177 @@ export const ProjectsModal: React.FC<ProjectsModalProps> = ({ isOpen }) => {
                         ? index
                         : index + 1;
 
+                      const isImageLoaded = Boolean(loadedImages[mediaUrl]);
+
                       return (
                         <div
                           key={`${currentProject.id}-${mediaUrl}`}
                           className="
-                              relative
-                              h-full
-                              w-full
-                              shrink-0
-                              snap-center
-                            "
+        relative
+        h-full
+        w-full
+        shrink-0
+        snap-center
+        overflow-hidden
+      "
                         >
-                          <img
+                          {/* =========================================
+          IMAGE LOADING SCENE
+      ========================================== */}
+
+                          <AnimatePresence>
+                            {!isImageLoaded && (
+                              <motion.div
+                                initial={
+                                  shouldReduceMotion
+                                    ? false
+                                    : {
+                                        opacity: 0,
+                                      }
+                                }
+                                animate={{
+                                  opacity: 1,
+                                }}
+                                exit={{
+                                  opacity: 0,
+                                }}
+                                transition={{
+                                  duration: shouldReduceMotion ? 0 : 0.2,
+                                }}
+                                className={`
+              absolute
+              inset-0
+              z-10
+
+              flex
+              items-center
+              justify-center
+
+              ${
+                isLight
+                  ? `
+                    bg-slate-100
+                  `
+                  : `
+                    bg-navy-base
+                  `
+              }
+            `}
+                              >
+                                <div
+                                  className="
+                flex
+                flex-col
+                items-center
+                gap-3
+                px-4
+                text-center
+              "
+                                >
+                                  {/* System icon */}
+                                  <div
+                                    className="
+                  relative
+                  flex
+                  h-10
+                  w-10
+                  items-center
+                  justify-center
+                "
+                                  >
+                                    <span
+                                      className="
+                    absolute
+                    inset-0
+                    rounded-full
+                    border
+                    border-accent-blue/20
+                  "
+                                    />
+
+                                    <span
+                                      className="
+                    h-2
+                    w-2
+                    rounded-full
+                    bg-accent-blue
+
+                    motion-safe:animate-pulse
+                  "
+                                    />
+                                  </div>
+
+                                  <div className="space-y-1">
+                                    <p
+                                      className="
+                    font-mono
+                    text-xs
+                    font-semibold
+                    uppercase
+                    tracking-wider
+                    text-accent-blue
+                  "
+                                    >
+                                      Loading Media
+                                    </p>
+
+                                    <p
+                                      className={`
+                    text-xs
+
+                    ${isLight ? "text-slate-500" : "text-slate-400"}
+                  `}
+                                    >
+                                      Preparing project preview...
+                                    </p>
+                                  </div>
+
+                                  {/* Loading bar */}
+                                  <div
+                                    className={`
+                  h-1
+                  w-32
+                  overflow-hidden
+                  rounded-full
+
+                  ${isLight ? "bg-slate-200" : "bg-dark-border"}
+                `}
+                                  >
+                                    <motion.div
+                                      className="
+                    h-full
+                    w-1/2
+                    rounded-full
+                    bg-accent-blue
+                  "
+                                      animate={
+                                        shouldReduceMotion
+                                          ? undefined
+                                          : {
+                                              x: ["-100%", "200%"],
+                                            }
+                                      }
+                                      transition={
+                                        shouldReduceMotion
+                                          ? undefined
+                                          : {
+                                              duration: 1.1,
+                                              repeat: Infinity,
+                                              ease: "easeInOut",
+                                            }
+                                      }
+                                    />
+                                  </div>
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+
+                          {/* =========================================
+          PROJECT IMAGE
+      ========================================== */}
+
+                          <motion.img
                             src={mediaUrl}
                             alt={
                               isCover
@@ -961,12 +1136,20 @@ export const ProjectsModal: React.FC<ProjectsModalProps> = ({ isOpen }) => {
                             }
                             loading={index === 0 ? "eager" : "lazy"}
                             decoding="async"
+                            onLoad={() => handleImageLoaded(mediaUrl)}
+                            initial={false}
+                            animate={{
+                              opacity: isImageLoaded ? 1 : 0,
+                            }}
+                            transition={{
+                              duration: shouldReduceMotion ? 0 : 0.3,
+                            }}
                             className={`
-                                h-full
-                                w-full
+          h-full
+          w-full
 
-                                ${isCover ? "object-cover" : "object-contain"}
-                              `}
+          ${isCover ? "object-cover" : "object-contain"}
+        `}
                           />
                         </div>
                       );
@@ -1113,8 +1296,6 @@ export const ProjectsModal: React.FC<ProjectsModalProps> = ({ isOpen }) => {
                   </>
                 )}
               </div>
-
-              
             </section>
 
             {/* =============================================
