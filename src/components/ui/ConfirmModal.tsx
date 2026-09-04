@@ -452,7 +452,7 @@ export const ConfirmExternalModal: React.FC = () => {
                   font-mono
                   text-xs
                   font-semibold
-                  text-white
+                  text-white!
                   shadow-md
                   transition-colors
 
