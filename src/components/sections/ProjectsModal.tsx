@@ -179,15 +179,6 @@ export const ProjectsModal: React.FC<ProjectsModalProps> = ({ isOpen }) => {
     scrollToMedia(newIndex);
   };
 
-  const handleMediaJump = (index: number) => {
-    if (index < 0 || index >= mediaList.length || index === mediaIndex) {
-      return;
-    }
-
-    setMediaIndex(index);
-    scrollToMedia(index);
-  };
-
   useEffect(() => {
     if (!isProjectMenuOpen) {
       return;
@@ -1123,94 +1114,7 @@ export const ProjectsModal: React.FC<ProjectsModalProps> = ({ isOpen }) => {
                 )}
               </div>
 
-              {/* =========================================
-                  MEDIA LABEL & INDICATORS
-              ========================================== */}
-
-              {hasMedia && (
-                <div
-                  className="
-                    flex
-                    items-center
-                    justify-between
-                    gap-3
-                    px-1
-                  "
-                >
-                  <span
-                    className={`
-                      font-mono
-                      text-xs
-                      font-medium
-                      uppercase
-                      tracking-wider
-
-                      ${isLight ? "text-slate-600" : "text-slate-400"}
-                    `}
-                  >
-                    {mediaIndex === 0 && currentProject.coverImage
-                      ? t.coverImageLabel
-                      : `${t.screenshotLabel} ${
-                          currentProject.coverImage
-                            ? mediaIndex
-                            : mediaIndex + 1
-                        }`}
-                  </span>
-
-                  {mediaList.length > 1 && (
-                    <div
-                      role="group"
-                      aria-label="Project media navigation"
-                      className="
-                        flex
-                        items-center
-                        gap-0.5
-                      "
-                    >
-                      {mediaList.map((_, index) => (
-                        <button
-                          key={index}
-                          type="button"
-                          onClick={() => handleMediaJump(index)}
-                          aria-label={`Go to project image ${index + 1}`}
-                          aria-current={
-                            mediaIndex === index ? "true" : undefined
-                          }
-                          className="
-                              flex
-                              h-10
-                              w-10
-                              items-center
-                              justify-center
-                              rounded-lg
-
-                              focus-visible:outline-none
-                              focus-visible:ring-2
-                              focus-visible:ring-accent-blue
-                            "
-                        >
-                          <span
-                            aria-hidden="true"
-                            className={`
-                                h-1.5
-                                rounded-full
-                                transition-all
-
-                                ${
-                                  mediaIndex === index
-                                    ? "w-5 bg-accent-blue"
-                                    : isLight
-                                      ? "w-1.5 bg-slate-300"
-                                      : "w-1.5 bg-slate-600"
-                                }
-                              `}
-                          />
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
+              
             </section>
 
             {/* =============================================
